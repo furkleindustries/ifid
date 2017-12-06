@@ -1,6 +1,6 @@
 {
   "name": "ifid",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "tsdist/index.js",
   "scripts": {
@@ -25,5 +25,14 @@
     "@types/node": "^8.0.55",
     "typescript": "^2.6.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.4.1",
+    "babel-cli": "^6.26.0",
+    "babel-env": "^2.4.1",
+    "babel-jest": "^21.2.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "jest": "^21.2.1",
+    "ts-jest": "^21.2.4",
+    "webpack": "^3.10.0"
+  }
 }

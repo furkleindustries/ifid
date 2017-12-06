@@ -1,4 +1,4 @@
-/* An RFC-4112 UUID generator for generating IFIDs, or Interactive Fiction
+/* An RFC 4112 UUID generator for generating IFIDs, or Interactive Fiction
  * Identifiers. */
 import {
   randomBytes,
