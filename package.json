@@ -1,0 +1,29 @@
+{
+  "name": "ifid",
+  "version": "0.0.1",
+  "description": "A package to generate Interactive Fiction Identifiers.",
+  "main": "tsdist/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/furkleindustries/ifid.git"
+  },
+  "keywords": [
+    "ifid",
+    "interactive",
+    "fiction"
+  ],
+  "author": "furkle",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/furkleindustries/ifid/issues"
+  },
+  "homepage": "https://github.com/furkleindustries/ifid#readme",
+  "dependencies": {
+    "@types/node": "^8.0.55",
+    "typescript": "^2.6.2"
+  },
+  "devDependencies": {}
+}
