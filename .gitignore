@@ -1,3 +1,4 @@
+dist/
 node_modules/
 .awcache
 .DS_Store

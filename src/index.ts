@@ -92,9 +92,9 @@ const endianness = ((): 'LE' | 'BE' => {
   const uint16 = new Uint16Array(arrayBuffer);
   uint8[0] = 0x00;
   uint8[1] = 0x01;
-  if (uint16[0] === 0x1000) {
+  if (uint16[0] === 0x100) {
     return 'LE';
-  } else if (uint16[0] === 0x0001) {
+  } else if (uint16[0] === 0x001) {
     return 'BE';
   } else {
     throw new Error(strings.ENDIANNESS_INVALID);
@@ -136,7 +136,7 @@ export function isValidLastResults(maybe: any): maybe is IIFIDLastResults {
     maybe &&
     isTwoBytesInHex(maybe.node) &&
     isSixtyBitsInHex(maybe.timestamp) &&
-    isFourteenBitsInHex(maybe.clockSequence);
+    isFourteenBits(maybe.clockSequence);
 }
 
 export interface IIFID {
@@ -147,11 +147,7 @@ export interface IIFID {
 
 export class IFID implements IIFID {
   readonly id:      IUUID;
-  readonly version: TUUIDVersion;
-
-  static generate(options: IIFIDOptions): IIFID {
-    return new this(options);
-  }
+  readonly version: TUUIDVersion = '1';
 
   static parse(text: string): IIFID {
     const id = UUID.parse(text);
@@ -161,7 +157,7 @@ export class IFID implements IIFID {
       version,
     };
 
-    return Object.assign(IFID, obj);
+    return Object.assign({}, IFID, obj);
   }
 
   constructor(options: IIFIDOptions) {
@@ -338,7 +334,7 @@ export class UUID implements IUUID {
     const csLow = parseInt(split[3].slice(split[3].length / 2), 16);
     const cs = (csHighReserved << 8) | csLow;
     const clockSequence = <TFourteenBitsInHex>cs.toString(2).split('');
-    if (!isFourteenBitsInHex(clockSequence)) {
+    if (!isFourteenBits(clockSequence)) {
       throw new Error(strings.CLOCK_SEQUENCE_INVALID);
     }
 
@@ -355,7 +351,7 @@ export class UUID implements IUUID {
       nodeIdentifierGetter: () => {},
     });
 
-    return Object.assign(uuid, {
+    return Object.assign({}, uuid, {
       __version: version,
       __timestamp: timestamp,
       __clockSequence: clockSequence,
@@ -363,8 +359,8 @@ export class UUID implements IUUID {
     });
   }
 
-  constructor(options: IUUIDOptions) {
-    if (options.skipCreation === true) {
+  constructor(options: IUUIDOptions = new UUIDOptions()) {
+    if (options && options.skipCreation === true) {
       return;
     }
 
@@ -414,18 +410,9 @@ export interface IUUIDOptions {
   clockSequenceGetter:  Function;
 };
 
-export function isUUIDOptions(maybe: any): maybe is IUUIDOptions {
-  return typeof maybe === 'object' &&
-    maybe &&
-    isUUIDVersion(maybe.version) &&
-    typeof maybe.nodeIdGetter === 'function' &&
-    typeof maybe.timestampGetter === 'function' &&
-    typeof maybe.clockSequenceGetter === 'function';
-}
-
 export class UUIDOptions implements IUUIDOptions {
   skipCreation = false;
-  version: TUUIDVersion = '4';
+  version: TUUIDVersion = '1';
   private __lastResults: IIFIDLastResults | null = null;
 
   constructor(version?: TUUIDVersion) {
@@ -458,7 +445,7 @@ export class UUIDOptions implements IUUIDOptions {
       const lts = this.__lastResults.timestamp.join('');
       const lastTimestamp = parseInt(lts, 16);
       if (lastTimestamp > getHundredsOfNanosecondsSinceGregorianReform() &&
-        isFourteenBitsInHex(this.__lastResults.clockSequence))
+        isFourteenBits(this.__lastResults.clockSequence))
       {
         const cs = this.__lastResults.clockSequence.join('');
         let csNum = parseInt(cs, 16);
@@ -525,7 +512,7 @@ export class UUIDOptions implements IUUIDOptions {
   clockSequenceGetter(): TFourteenBitsInHex {
     if (isNode && this.__lastResults) {
       const clockSequence = this.__lastResults.clockSequence;
-      if (isFourteenBitsInHex(clockSequence)) {
+      if (isFourteenBits(clockSequence)) {
         return clockSequence;
       }
     }
@@ -554,6 +541,15 @@ export class UUIDOptions implements IUUIDOptions {
 
     return <TFourteenBitsInHex>bits;
   }
+}
+
+export function isUUIDOptions(maybe: any): maybe is IUUIDOptions {
+  return typeof maybe === 'object' &&
+    maybe &&
+    isUUIDVersion(maybe.version) &&
+    typeof maybe.nodeIdentifierGetter === 'function' &&
+    typeof maybe.timestampGetter === 'function' &&
+    typeof maybe.clockSequenceGetter === 'function';
 }
 
 export class IFIDOptions extends UUIDOptions {}
@@ -633,7 +629,7 @@ export type TFourteenBitsInHex = [
   TBit       /* 14 */
 ];
 
-export function isFourteenBitsInHex(maybe: any): maybe is TFourteenBitsInHex {
+export function isFourteenBits(maybe: any): maybe is TFourteenBitsInHex {
   return Array.isArray(maybe) &&
     maybe.filter((aa) => isBit(aa)).length === 14;
 }
