@@ -105,6 +105,7 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
                 {
                   targets: {
                     browsers: [
+                      '>1%',
                       'last 12 versions',
                     ],
                   },

@@ -4,7 +4,8 @@
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.esnext.json && tsc --project tsconfig.es6.json && webpack --display-modules",
+    "postinstall": "node postinstall.js",
+    "build": "tsc && tsc --project tsconfig.es6.json && webpack --display-modules",
     "test": "jest",
     "test-coverage": "jest --coverage",
     "test-watch": "jest --watch",
@@ -31,7 +32,7 @@
     "uglifyjs-webpack-plugin": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "^8.0.56",
+    "@types/node": "^8.0.57",
     "babel-cli": "^6.26.0",
     "babel-env": "^2.4.1",
     "babel-jest": "^21.2.0",
