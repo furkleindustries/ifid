@@ -99,6 +99,8 @@ export class UUID implements IUUID {
       throw new Error(strings.UUID_VERSION_INVALID);
     }
 
+    this.__version = version;
+
     /* Clock sequence is highly dependent on other values and their 
      * availability, so it should be generated first. */
     const clockSequence = options.clockSequenceGetter(version);
@@ -134,14 +136,7 @@ export class UUID implements IUUID {
   }
 
   get timeLow(): TFourBytesInHex {
-    const low = parseInt(this.timestamp.join(''), 16) & 0xFFFFFFFF;
-    const timeLow = <TFourBytesInHex>low.toString(16).split('');
-
-    /* Left-pad with necessary zeroes. */
-    for (let ii = timeLow.length; ii < 8; ii += 1) {
-      timeLow.unshift('0');
-    }
-
+    const timeLow = <TFourBytesInHex>this.timestamp.slice(7, 15);
     if (!isFourBytesInHex(timeLow)) {
       throw new Error(strings.TIME_LOW_INVALID);
     }
@@ -150,14 +145,7 @@ export class UUID implements IUUID {
   }
 
   get timeMid(): TTwoBytesInHex {
-    const mid = (parseInt(this.timestamp.join(''), 16) >> 32) & 0xFFFF;
-    const timeMid = <TTwoBytesInHex>mid.toString(16).split('');
-    
-    /* Left-pad with necessary zeroes. */
-    for (let ii = timeMid.length; ii < 4; ii += 1) {
-      timeMid.unshift('0');
-    }
-
+    const timeMid = <TTwoBytesInHex>this.timestamp.slice(3, 7);
     if (!isTwoBytesInHex(timeMid)) {
       throw new Error(strings.TIME_MID_INVALID);
     }
@@ -166,14 +154,7 @@ export class UUID implements IUUID {
   }
 
   get timeHigh(): TTwelveBitsInHex {
-    const high = (parseInt(this.timestamp.join(''), 16) >> 48) & 0x0FFF;
-    const timeHigh = <TTwelveBitsInHex>high.toString(16).split('');
-
-    /* Left-pad with necessary zeroes. */
-    for (let ii = timeHigh.length; ii < 3; ii += 1) {
-      timeHigh.unshift('0');
-    }
-
+    const timeHigh = <TTwelveBitsInHex>this.timestamp.slice(0, 3);
     if (!isTwelveBitsInHex(timeHigh)) {
       throw new Error(strings.TIME_HIGH_INVALID);
     }
@@ -184,19 +165,16 @@ export class UUID implements IUUID {
   get timeHighAndVersion(): TTwoBytesInHex {
     const _timeHigh = parseInt(this.timeHigh.join(''), 16);
     const _version = parseInt(this.version, 16) << 12;
-    const high = _timeHigh | _version;
-    const timeHigh = <TTwoBytesInHex>high.toString(16).split('');
+    const highAndVersion = _timeHigh | _version;
+    const timeHighAndVersion = <TTwoBytesInHex>highAndVersion
+      .toString(16)
+      .split('');
 
-    /* Left-pad with necessary zeroes. */
-    for (let ii = timeHigh.length; ii < 4; ii += 1) {
-      timeHigh.unshift('0');
-    }
-
-    if (!isTwoBytesInHex(timeHigh)) {
+    if (!isTwoBytesInHex(timeHighAndVersion)) {
       throw new Error(strings.TIME_HIGH_AND_VERSION_INVALID);
     }
 
-    return timeHigh;
+    return timeHighAndVersion;
   }
 
   private __clockSequence: TFourteenBits;
@@ -320,3 +298,5 @@ export class UUID implements IUUID {
       this.nodeIdentifier.join('');
   }
 }
+
+export default UUID;
