@@ -2,7 +2,7 @@
   "name": "ifid",
   "version": "0.1.0",
   "description": "A package to generate Interactive Fiction Identifiers.",
-  "main": "dist/index.js",
+  "main": "dist/es6.node/index.js",
   "scripts": {
     "postinstall": "node postinstall.js",
     "build": "tsc && tsc --project tsconfig.es6.json && webpack --display-modules",
