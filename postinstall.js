@@ -56,7 +56,7 @@ fs.stat(filePath, (err, stats) => {
 
           if (!isFourteenBits(obj.clockSequence)) {
             /* Initialize clock sequence to random value. */
-            obj.clockSequence = random(2).slice(0, 14);
+            obj.clockSequence = random(2).slice(0, 14).split('');
             changed = true;
           }
 
@@ -70,7 +70,7 @@ fs.stat(filePath, (err, stats) => {
             const str = JSON.stringify(obj);
             const resolve = () => process.exit(0);
             const reject = () => process.exit(1);
-            writeRecordPromise(str, resolve, reject).then(() => console.log('fooooob'));
+            writeRecordPromise(str, resolve, reject);
           }
         }
         
