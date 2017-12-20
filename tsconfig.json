@@ -1,20 +1,24 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/esnext.node/",
-    "lib": [ "esnext" ],
-    "jsx": "preserve",
-    "sourceMap": false,
-    "noImplicitAny": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "target": "esnext",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "strictNullChecks": true
+    "allowJs":                          true,
+    "downlevelIteration":               true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx":                              "preserve",
+    "lib":                              [
+                                          "esnext"
+                                        ],
+  
+    "moduleResolution":                 "node",
+    "noEmitOnError":                    true,
+    "noFallthroughCasesInSwitch":       true,
+    "noUnusedLocals":                   true,
+    "noUnusedParameters":               true,
+    "preserveConstEnums":               true,
+    "removeComments":                   true,
+    "sourceMap":                        false,
+    "strict":                           true
   },
 
-  "exclude": [ "./src/**/*.test.*" ],
-  "include": [ "./src/**/*" ]
+  "exclude": [ "src/**/*.test.*" ],
+  "include": [ "src/**/*" ]
 }

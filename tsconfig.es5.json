@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module":  "umd",
-    "outDir":  "./dist/es6.node/",
-    "target":  "es6"
+    "outDir":  "./dist/es5.node/",
+    "target":  "es5"
   }
 }

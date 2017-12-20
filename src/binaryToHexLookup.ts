@@ -1,12 +1,8 @@
 import {
   THexDigit,
-} from "./TypeAliases/THexDigit";
+} from './TypeAliases/THexDigit';
 
-type TBinaryToHexLookup = {
-  [key: string]: THexDigit;
-}
-
-export const binaryToHexLookup: TBinaryToHexLookup = {
+export const binaryToHexLookup: { [key: string]: THexDigit } = {
   '0000': '0',
   '0001': '1',
   '0010': '2',

@@ -32,21 +32,18 @@ import {
   TSixtyBitsInHex,
 } from './TypeAliases/TSixtyBitsInHex';
 import { TUUIDLastResults } from './TypeAliases/TUUIDLastResults';
+import { TUUIDVersion } from './TypeAliases/TUUIDVersion';
 
-export function timestampGetter(): TSixtyBitsInHex {
+export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
   const _lastResults = <TUUIDLastResults>lastResults;
   const timestamp = _lastResults.timestamp;
   const clockSequence = _lastResults.clockSequence;
   let newTimestamp: TSixtyBitsInHex;
-  if (this.version === '1' &&
-    isSixtyBitsInHex(timestamp))
-  {
+  if (version === '1' && isSixtyBitsInHex(timestamp)) {
     const lastTimestamp = parseInt(timestamp.join(''), 16);
     const currentTimestamp = getHundredsOfNanosecondsSinceGregorianReform();
     /* Check if the last recorded timestamp is after the current time. */
-    if (lastTimestamp > currentTimestamp &&
-      isFourteenBits(clockSequence))
-    {
+    if (lastTimestamp > currentTimestamp && isFourteenBits(clockSequence)) {
       /* Increment the clock sequence given that the timestamp is invalid. */
       _lastResults.clockSequence = ((): TFourteenBits => {
         const csNum = parseInt(clockSequence.join(''), 2) + 1;
