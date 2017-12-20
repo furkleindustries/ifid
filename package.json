@@ -7,11 +7,11 @@
   "scripts": {
     "postinstall": "npm run build-node-es6 && node postinstall.js",
     "build": "npm run build-node && npm run build-browser",
-    "build-node": "npm run build-node-esnext && npm run build-node-es6 && npm run build-node-es5 && npm run build-declaration-files",
+    "build-node": "npm run build-node-esnext && npm run build-node-es6 && npm run build-node-es5 && npm run build-declaration-file",
     "build-node-esnext": "tsc --project tsconfig.esnext.json",
     "build-node-es6": "tsc --project tsconfig.es6.json",
     "build-node-es5": "tsc --project tsconfig.es5.json",
-    "build-declaration-files": "tsc --project tsconfig.d.json && cp dist/esnext.node/index.d.ts .",
+    "build-declaration-file": "tsc --project tsconfig.d.json && cp dist/esnext.node/index.d.ts .",
     "build-browser": "webpack --display-modules",
     "test": "jest",
     "test-coverage": "jest --coverage",
