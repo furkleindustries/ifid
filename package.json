@@ -1,9 +1,9 @@
 {
   "name": "ifid",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/es6.node/index.js",
-  "types": "./index.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "postinstall": "npm run build-node-es6 && node postinstall.js",
     "build": "npm run build-node && npm run build-browser",
@@ -11,7 +11,7 @@
     "build-node-esnext": "tsc --project tsconfig.esnext.json",
     "build-node-es6": "tsc --project tsconfig.es6.json",
     "build-node-es5": "tsc --project tsconfig.es5.json",
-    "build-declaration-file": "tsc --project tsconfig.d.json && cp dist/esnext.node/index.d.ts .",
+    "build-declaration-file": "tsc --project tsconfig.d.json && mv dist/esnext.node/index.d.ts src/",
     "build-browser": "webpack --display-modules",
     "test": "jest",
     "test-coverage": "jest --coverage",
