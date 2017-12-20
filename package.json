@@ -1,6 +1,6 @@
 {
   "name": "ifid",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/es6.node/index.js",
   "types": "src/index.d.ts",
@@ -34,19 +34,19 @@
   },
   "homepage": "https://github.com/furkleindustries/ifid#readme",
   "devDependencies": {
-    "babel-plugin-transform-object-assign": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
-    "uglifyjs-webpack-plugin": "^1.1.2",
-    "@types/node": "^8.0.57",
+    "@types/node": "^8.5.1",
     "babel-cli": "^6.26.0",
     "babel-env": "^2.4.1",
     "babel-jest": "^21.2.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
     "babel-preset-minify": "^0.2.0",
     "jest": "^21.2.1",
     "ts-jest": "^21.2.4",
     "typescript": "^2.6.2",
+    "uglifyjs-webpack-plugin": "^1.1.4",
     "webpack": "^3.10.0"
   }
 }
