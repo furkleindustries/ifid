@@ -1,22 +1,10 @@
 export const strings = {
-  ENDIANNESS_INVALID:
-    'The endianness of the host machine could not be detected as ' +
-    'little-endian or big-endian. This is almost certainly a problem with ' +
-    'the ifid package rather than the host machine.',
-
   BIT_ARRAY_INVALID:
     'The array of bits was not an array, had no contents, or had one or ' +
     'more items which did not meet the isBit type guard.',
 
   UUID_VERSION_INVALID:
     'The version argument was not a valid UUID version.',
-
-  RANDOM_GENERATOR_INVALID:
-    'A suitable random number generator could not be found.',
-
-  RANDOM_BYTES_COUNT_INVALID:
-    'The num argument, representing the number of random bytes to generate, ' +
-    'was not an integer greater than or equal to 1.',
 
   TIMESTAMP_GENERATION_FAILED:
     'The random number generator did not produce an acceptable value for ' +
@@ -25,9 +13,17 @@ export const strings = {
   TIMESTAMP_INVALID:
     'The timestamp property of the UUID object is malformed.',
 
+  NAMESPACE_ID_MISSING:
+    'In order to construct a v3 or v5 UUID, you need to provide a ' +
+    'namespace ID to be hashed.',
+
+  NAME_MISSING:
+    'In order to construct a v3 or v5 UUID, you need to provide a ' +
+    'name to be hashed.',
+
   CLOCK_SEQUENCE_INVALID:
     'The clockSequence property of the UUID object is malformed.',
-    
+
   CLOCK_SEQUENCE_GENERATION_FAILED:
     'The random number generator did not produce an acceptable value for ' +
     'the random number used in place of a stable clock sequence.',
@@ -49,6 +45,10 @@ export const strings = {
   MAC_ADDRESS_INVALID:
     'The MAC address was found, but it was malformed.',
 
+  UUID_LAST_RESULTS_INVALID:
+    'The provided last results object did not meet the isValidLastResults ' +
+    'type guard.',
+
   UUID_STRING_INVALID:
     'The text argument passed to UUID.parse was malformed.',
 
@@ -67,7 +67,7 @@ export const strings = {
   TIME_HIGH_INVALID:
     'The timestamp property did not produce a valid high portion of the ' +
     'timestamp.',
-    
+  
   TIME_HIGH_AND_VERSION_INVALID:
     'The timestamp property did not produce a valid high-and-version ' +
     'multiplex.',

@@ -1,5 +1,5 @@
-declare const window: { [key: string]: any, };
-
-export const isNode: boolean = typeof window === 'undefined';
+export const isNode = () => Boolean(typeof process !== 'undefined' &&
+                                    process.versions &&
+                                    process.versions.node);
 
 export default isNode;

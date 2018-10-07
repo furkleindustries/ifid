@@ -1,21 +1,21 @@
 import {
-  isBit,
-} from './TypeGuards/isBit';
+  convertBinStrToUint8Array,
+} from './convertBinStrToUint8Array';
 import {
-  isFourteenBits,
-} from './TypeGuards/isFourteenBits';
+  createHash,
+} from 'crypto';
 import {
-  isNode,
-} from './isNode';
-import {
-  isSixBytesInHex,
-} from './TypeGuards/isSixBytesInHex';
+  isUUIDVersion,
+} from './TypeGuards/isUUIDVersion';
 import {
   lastResults,
 } from './lastResults';
 import {
+  NamespaceIds,
+} from './Enums/NamespaceIds';
+/*import {
   nodeIdentifierGetter,
-} from './nodeIdentifierGetter';
+} from './nodeIdentifierGetter';*/
 import {
   randomBytesGenerator,
 } from './randomBytesGenerator';
@@ -23,45 +23,76 @@ import {
   strings,
 } from './strings';
 import {
-  TFourteenBits,
-} from './TypeAliases/TFourteenBits';
-import {
-  TUUIDLastResults,
-} from './TypeAliases/TUUIDLastResults';
-import {
   TUUIDVersion,
 } from './TypeAliases/TUUIDVersion';
+import {
+  uintArrayAsNumber,
+} from './uintArrayAsNumber';
 
-export function clockSequenceGetter(version: TUUIDVersion): TFourteenBits {
-  let clockSequence: TFourteenBits | null = null;
-  const _lastResults = <TUUIDLastResults>lastResults;
-  if (version === '1' && isNode) {
-    clockSequence = _lastResults.clockSequence;
-    const lastNodeIdentifier = _lastResults.nodeIdentifier;
-    const currentNodeIdentifier = nodeIdentifierGetter(version);
-    if (!isFourteenBits(clockSequence) ||
-      !isSixBytesInHex(lastNodeIdentifier) ||
-      !isSixBytesInHex(currentNodeIdentifier) ||
-      lastNodeIdentifier !== currentNodeIdentifier)
-    {
-      clockSequence = null;
+export function clockSequenceGetter(
+  version: TUUIDVersion,
+  namespaceId?: NamespaceIds,
+  name?: string,
+): Uint8Array
+{
+  if (!isUUIDVersion(version)) {
+    throw new Error(strings.UUID_VERSION_INVALID);
+  }
+
+  let clockSequence: Uint8Array;
+  if (/^[14]$/.test(version.toString())) {
+    const getRandomSeq = () => {
+      /* If the clock sequence cannot be found, or a non-V1 ID is being 
+       * generated, generate a random new clock sequence. */
+      const clockSequenceNum = uintArrayAsNumber(randomBytesGenerator(2));
+      const clockSequenceBin = clockSequenceNum.toString(2).slice(0, 14);
+      return new Uint8Array([
+        parseInt(clockSequenceBin.slice(0, 6), 2),
+        parseInt(clockSequenceBin.slice(6), 2),
+      ]);
     }
+
+    if (lastResults.clockSequence &&
+        'BYTES_PER_ELEMENT' in lastResults.clockSequence)
+    {
+      return lastResults.clockSequence;
+    } else {
+      clockSequence = getRandomSeq();
+      if (version.toString() === '1') {
+        lastResults.clockSequence = clockSequence;
+      }
+    }
+  } else {
+    console.log(namespaceId, name);
+    /* Version is 3 or 5. */
+    if (!namespaceId) {
+      throw new Error(strings.NAMESPACE_ID_MISSING);
+    } else if (!name) {
+      throw new Error(strings.NAME_MISSING);
+    }
+
+    let hash: string;
+    let hasher;
+    if (version.toString() === '3') {
+      hasher = createHash('md5');
+    } else {
+      hasher = createHash('sha1');
+    }
+
+    hasher.update(namespaceId + name);
+    hash = hasher.digest('hex');
+
+    let clockSequenceStr = '';
+    
+    /* clock_seq_hi */
+    clockSequenceStr += hash.slice(16, 18);
+    /* clock_seq_low */
+    clockSequenceStr += hash.slice(18, 20);
+    const clockSequenceBinStr = parseInt(clockSequenceStr, 16).toString(2).padStart(14, '0');
+    clockSequence = convertBinStrToUint8Array(clockSequenceBinStr);
   }
 
-  if (!clockSequence) {
-    /* If the clock sequence cannot be found, or a non-V1 ID is being 
-     * generated, generate a random new clock sequence. */
-    clockSequence = <TFourteenBits>randomBytesGenerator(2)
-      .split('')
-      .slice(0, 14);
-  }
-  
-  if (clockSequence.filter((aa) => isBit(aa)).length !== 14) {
-    throw new Error(strings.CLOCK_SEQUENCE_HIGH_INVALID);
-  }
-
-  _lastResults.clockSequence = clockSequence;
-  return <TFourteenBits>clockSequence;
+  return clockSequence;
 }
 
 export default clockSequenceGetter;

@@ -1,21 +1,18 @@
 import {
-  binaryToHexDigits,
-} from './binaryToHexDigits';
-import {
-  isFourteenBits,
-} from './TypeGuards/isFourteenBits';
-import {
-  isHexDigit,
-} from './TypeGuards/isHexDigit';
-import {
-  isSixtyBitsInHex,
-} from './TypeGuards/isSixtyBitsInHex';
+  createHash,
+} from 'crypto';
 import {
   getHundredsOfNanosecondsSinceGregorianReform,
 } from './getHundredsOfNanosecondsSinceGregorianReform';
 import {
+  isUUIDVersion,
+} from './TypeGuards/isUUIDVersion';
+import {
   lastResults,
 } from './lastResults';
+import {
+  NamespaceIds,
+} from './Enums/NamespaceIds';
 import {
   randomBytesGenerator,
 } from './randomBytesGenerator';
@@ -23,62 +20,79 @@ import {
   strings,
 } from './strings';
 import {
-  TBit,
-} from './TypeAliases/TBit';
+  TUUIDVersion,
+} from './TypeAliases/TUUIDVersion';
 import {
-  TFourteenBits,
-} from './TypeAliases/TFourteenBits';
-import {
-  TSixtyBitsInHex,
-} from './TypeAliases/TSixtyBitsInHex';
-import { TUUIDLastResults } from './TypeAliases/TUUIDLastResults';
-import { TUUIDVersion } from './TypeAliases/TUUIDVersion';
+  uintArrayAsNumber,
+} from './uintArrayAsNumber';
+import { convertBinStrToUint8Array } from './convertBinStrToUint8Array';
 
-export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
-  const _lastResults = <TUUIDLastResults>lastResults;
-  const timestamp = _lastResults.timestamp;
-  const clockSequence = _lastResults.clockSequence;
-  let newTimestamp: TSixtyBitsInHex;
-  if (version === '1' && isSixtyBitsInHex(timestamp)) {
-    const lastTimestamp = parseInt(timestamp.join(''), 16);
+export function timestampGetter(
+  version: TUUIDVersion,
+  namespaceId?: NamespaceIds,
+  name?: string,
+): Uint8Array
+{
+  if (!isUUIDVersion(version)) {
+    throw new Error(strings.UUID_VERSION_INVALID);
+  }
+  
+  let timestamp: Uint8Array;
+  if (version.toString() === '1') {
+    const oldTimestamp = lastResults.timestamp;
     const currentTimestamp = getHundredsOfNanosecondsSinceGregorianReform();
     /* Check if the last recorded timestamp is after the current time. */
-    if (lastTimestamp > currentTimestamp && isFourteenBits(clockSequence)) {
+    if ((oldTimestamp && 'BYTES_PER_ELEMENT' in oldTimestamp) &&
+        (uintArrayAsNumber(oldTimestamp) > currentTimestamp) &&
+        (lastResults.clockSequence && 'BYTES_PER_ELEMENT' in lastResults.clockSequence))
+    {
       /* Increment the clock sequence given that the timestamp is invalid. */
-      _lastResults.clockSequence = ((): TFourteenBits => {
-        const csNum = parseInt(clockSequence.join(''), 2) + 1;
-        if (csNum > parseInt('11111111111111', 2)) {
-          /* Prevent overflowing 14-bit space. */
-          return <TFourteenBits>'00000000000000'.split('');
-        } else {
-          return <TFourteenBits>csNum.toString(2).split('');
-        }
-      })();
+      lastResults.clockSequence[1] += 1;
     }
 
-    /* Return the current timestamp. */
-    newTimestamp = <TSixtyBitsInHex>currentTimestamp.toString(16).split('');
-    /* Left-pad timestamp up to 15 digits. */
-    for (let ii = newTimestamp.length; ii < 15; ii += 1) {
-      newTimestamp.unshift('0');
+    const timestampStr = currentTimestamp.toString(2).padStart(60, '0');
+    const inputArr = [];
+    for (let ii = 60; ii > 0; ii -= 8) {
+      const byte = timestampStr.slice(ii - 8, ii).padStart(8, '0');
+      inputArr.unshift(parseInt(byte, 2));
     }
+
+    timestamp = new Uint8Array(inputArr);
+  } else if (/^[35]$/.test(version.toString())) {
+    if (!name || typeof name !== 'string') {
+      throw new Error(strings.NAME_MISSING);
+    }
+
+    let hash: string;
+    let hasher;
+    if (version.toString() === '3') {
+      hasher = createHash('md5');
+    } else {
+      hasher = createHash('sha1');
+    }
+
+    hasher.update(namespaceId + name);
+    hash = hasher.digest('hex');
+
+    let timestampStr = '';
+    /* time_low */
+    timestampStr = hash.slice(0, 8) + timestampStr;
+    /* time_mid */
+    timestampStr = hash.slice(8, 12) + timestampStr;
+    /* time_hi */
+    timestampStr = hash.slice(12, 16) + timestampStr;
+    const timestampBinStr = parseInt(timestampStr, 16).toString(2).padStart(60, '0');
+    timestamp = convertBinStrToUint8Array(timestampBinStr);
   } else {
-    const bin = randomBytesGenerator(8);
-    if (bin.length < 60) {
-      throw new Error(strings.TIMESTAMP_GENERATION_FAILED);
-    }
-
-    const values = <Array<TBit>>bin.slice(0, 60).split('');
-    const hexes = <TSixtyBitsInHex>binaryToHexDigits(values, 15);
-    if (hexes.filter((aa) => isHexDigit(aa)).length !== hexes.length) {
-      throw new Error(strings.TIMESTAMP_GENERATION_FAILED);
-    }
-
-    newTimestamp = hexes;
+    /* version is 4 */
+    timestamp = randomBytesGenerator(8);
+    /* Only take the most significant 4 bits of the last byte as the timestamp
+     * is only 60 bits. */
+    timestamp[7] = parseInt(timestamp[7].toString(2).slice(0, 4), 2);
   }
 
-  _lastResults.timestamp = newTimestamp;
-  return newTimestamp;
+  lastResults.timestamp = timestamp;
+  return timestamp;
 }
 
 export default timestampGetter;
