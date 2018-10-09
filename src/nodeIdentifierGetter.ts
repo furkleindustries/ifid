@@ -3,8 +3,8 @@ import {
 } from 'os';
 
 import {
-  binaryToHexDigits,
-} from './binaryToHexDigits';
+  getHashFromNamespaceIdAndName,
+} from './getHashFromNamespaceIdAndName';
 import {
   getMAC,
 } from './getMAC';
@@ -33,15 +33,26 @@ export function nodeIdentifierGetter(version: TUUIDVersion): TSixBytesInHex {
       throw new Error(strings.MAC_ADDRESS_UNAVAILABLE);
     }
 
-    const MAC = getMAC();
-    if (!isSixBytesInHex(MAC)) {
-      throw new Error(strings.MAC_ADDRESS_INVALID);
-    }
+    nodeIdentifier = getMAC();
+    lastResults.nodeIdentifier = nodeIdentifier;
+  } else if (/^[35]$/.test(version.toString())) {
+    const hash = getHashFromNamespaceIdAndName(
+      version,
+      namespaceId!,
+      name!,
+    );
 
-    return MAC;
-  } else if (/^[345]$/.test(version)) {
-    const bytes = <Array<TBit>>randomBytesGenerator(6).split('');
-    return <TSixBytesInHex>binaryToHexDigits(bytes, 12);
+    let nodeIdentifierStr = '';
+    
+    /* node_identifier */
+    nodeIdentifierStr += hash.slice(20, 32);
+    const nodeIdentifierBinStr = parseInt(nodeIdentifierStr, 16)
+      .toString(2)
+      .padStart(48, '0');
+
+    nodeIdentifier = convertBinStrToUint8Array(nodeIdentifierBinStr);
+  } else if (version.toString() === '4') {
+    nodeIdentifier = randomBytesGenerator(6);
   } else {
     throw new Error(strings.UUID_VERSION_INVALID);
   }

@@ -1,15 +1,9 @@
 import {
-  binaryToHexDigits,
-} from './binaryToHexDigits';
+  convertBinStrToUint8Array,
+} from './convertBinStrToUint8Array';
 import {
-  isFourteenBits,
-} from './TypeGuards/isFourteenBits';
-import {
-  isHexDigit,
-} from './TypeGuards/isHexDigit';
-import {
-  isSixtyBitsInHex,
-} from './TypeGuards/isSixtyBitsInHex';
+  getHashFromNamespaceIdAndName,
+} from './getHashFromNamespaceIdAndName';
 import {
   getHundredsOfNanosecondsSinceGregorianReform,
 } from './getHundredsOfNanosecondsSinceGregorianReform';
@@ -29,10 +23,8 @@ import {
   TFourteenBits,
 } from './TypeAliases/TFourteenBits';
 import {
-  TSixtyBitsInHex,
-} from './TypeAliases/TSixtyBitsInHex';
-import { TUUIDLastResults } from './TypeAliases/TUUIDLastResults';
-import { TUUIDVersion } from './TypeAliases/TUUIDVersion';
+  uintArrayAsNumber,
+} from './uintArrayAsNumber';
 
 export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
   const _lastResults = <TUUIDLastResults>lastResults;
@@ -62,19 +54,31 @@ export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
     for (let ii = newTimestamp.length; ii < 15; ii += 1) {
       newTimestamp.unshift('0');
     }
+
+    timestamp = new Uint8Array(inputArr);
+  } else if (/^[35]$/.test(version.toString())) {    
+    /* Version is 3 or 5. */
+    const hash = getHashFromNamespaceIdAndName(
+      version,
+      namespaceId!,
+      name!,
+    );
+
+    let timestampStr = '';
+    /* time_low */
+    timestampStr = hash.slice(0, 8);
+    /* time_mid */
+    timestampStr = hash.slice(8, 12) + timestampStr;
+    /* time_hi */
+    timestampStr = hash.slice(12, 16) + timestampStr;
+    const timestampBinStr = parseInt(timestampStr, 16).toString(2).padStart(60, '0');
+    timestamp = convertBinStrToUint8Array(timestampBinStr);
   } else {
-    const bin = randomBytesGenerator(8);
-    if (bin.length < 60) {
-      throw new Error(strings.TIMESTAMP_GENERATION_FAILED);
-    }
-
-    const values = <Array<TBit>>bin.slice(0, 60).split('');
-    const hexes = <TSixtyBitsInHex>binaryToHexDigits(values, 15);
-    if (hexes.filter((aa) => isHexDigit(aa)).length !== hexes.length) {
-      throw new Error(strings.TIMESTAMP_GENERATION_FAILED);
-    }
-
-    newTimestamp = hexes;
+    /* version is 4 */
+    timestamp = randomBytesGenerator(8);
+    /* Only take the most significant 4 bits of the last byte as the timestamp
+     * is only 60 bits. */
+    timestamp[7] = parseInt(timestamp[7].toString(2).slice(0, 4), 2);
   }
 
   _lastResults.timestamp = newTimestamp;

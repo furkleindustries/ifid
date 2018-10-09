@@ -2,8 +2,8 @@ import {
   isBit,
 } from './TypeGuards/isBit';
 import {
-  isFourteenBits,
-} from './TypeGuards/isFourteenBits';
+  getHashFromNamespaceIdAndName,
+} from './getHashFromNamespaceIdAndName';
 import {
   isNode,
 } from './isNode';
@@ -14,8 +14,8 @@ import {
   lastResults,
 } from './lastResults';
 import {
-  nodeIdentifierGetter,
-} from './nodeIdentifierGetter';
+  NamespaceIds,
+} from './Enums/NamespaceIds';
 import {
   randomBytesGenerator,
 } from './randomBytesGenerator';
@@ -44,20 +44,29 @@ export function clockSequenceGetter(version: TUUIDVersion): TFourteenBits {
       !isSixBytesInHex(currentNodeIdentifier) ||
       lastNodeIdentifier !== currentNodeIdentifier)
     {
-      clockSequence = null;
+      return lastResults.clockSequence;
+    } else {
+      clockSequence = getRandomSeq();
+      if (version.toString() === '1') {
+        lastResults.clockSequence = clockSequence;
+      }
     }
-  }
+  } else {
+    /* Version is 3 or 5. */
+    const hash = getHashFromNamespaceIdAndName(
+      version,
+      namespaceId!,
+      name!,
+    );
 
-  if (!clockSequence) {
-    /* If the clock sequence cannot be found, or a non-V1 ID is being 
-     * generated, generate a random new clock sequence. */
-    clockSequence = <TFourteenBits>randomBytesGenerator(2)
-      .split('')
-      .slice(0, 14);
-  }
-  
-  if (clockSequence.filter((aa) => isBit(aa)).length !== 14) {
-    throw new Error(strings.CLOCK_SEQUENCE_HIGH_INVALID);
+    let clockSequenceStr = '';
+    
+    /* clock_seq_hi */
+    clockSequenceStr += hash.slice(16, 18);
+    /* clock_seq_low */
+    clockSequenceStr += hash.slice(18, 20);
+    const clockSequenceBinStr = parseInt(clockSequenceStr, 16).toString(2).padStart(14, '0');
+    clockSequence = convertBinStrToUint8Array(clockSequenceBinStr);
   }
 
   _lastResults.clockSequence = clockSequence;

@@ -1,13 +1,13 @@
 import {
+  IFIDVersions,
+} from '../Enums/IFIDVersions';
+import {
   IUUID,
 } from '../UUID/IUUID';
-import {
-  TUUIDVersion,
-} from '../TypeAliases/TUUIDVersion';
 
 export interface IIFID {
-  id:         IUUID;
-  version:    TUUIDVersion;
+  uuid?: IUUID;
+  version: IFIDVersions;
   toString(): string;
 }
 

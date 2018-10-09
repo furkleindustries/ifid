@@ -84,11 +84,29 @@ import {
  *          "A" / "B" / "C" / "D" / "E" / "F"
  */
 export class UUID implements IUUID {
-  constructor(options: IUUIDOptions = new UUIDOptions()) {
-    /* Allow the calling function to generate an empty UUID. */
-    if (options && options.skipCreation === true) {
-      return;
-    }
+  constructor(options?: Partial<IUUIDOptions>) {
+    const opts = new UUIDOptions();
+
+    if (typeof options === 'object' && options) {
+      if (options.version) {
+        opts.version = options.version;
+      }
+
+      if (options.clockSequenceGetter) {
+        opts.clockSequenceGetter = options.clockSequenceGetter;
+      }
+
+      if (options.timestampGetter) {
+        opts.timestampGetter = options.timestampGetter;
+      }
+
+      if (options.nodeIdentifierGetter) {
+        opts.nodeIdentifierGetter = options.nodeIdentifierGetter;
+      }
+
+      if (options.namespaceId) {
+        opts.namespaceId = options.namespaceId;
+      }
 
     if (!isUUIDOptions(options)) {
       throw new Error(strings.UUID_OPTIONS_INVALID);
@@ -108,21 +126,49 @@ export class UUID implements IUUID {
       throw new Error(strings.CLOCK_SEQUENCE_INVALID);
     }
 
-    this.__clockSequence = clockSequence;
+    this.__version = version;
+    
+    if (/^[35]$/.test(version.toString())) {
+      /* Clock sequence is highly dependent on other values and their 
+       * availability, so it should be generated first. */
+      const clockSequence = opts.clockSequenceGetter(
+        version,
+        opts.namespaceId,
+        opts.name
+      );
 
-    const timestamp = options.timestampGetter(version);
-    if (!isSixtyBitsInHex(timestamp)) {
-      throw new Error(strings.TIMESTAMP_INVALID);
+      this.__clockSequence = clockSequence;
+
+      const timestamp = opts.timestampGetter(
+        version,
+        opts.namespaceId,
+        opts.name,
+      );
+
+      this.__timestamp = timestamp;
+
+      const nodeIdentifier = opts.nodeIdentifierGetter(
+        version,
+        opts.namespaceId,
+        opts.name,
+      );
+
+      this.__nodeIdentifier = nodeIdentifier;
+    } else {
+      const clockSequence = opts.clockSequenceGetter(version);
+      this.__clockSequence = clockSequence;
+
+      const timestamp = opts.timestampGetter(version);
+      this.__timestamp = timestamp;
+
+      const nodeIdentifier = opts.nodeIdentifierGetter(version);
+      this.__nodeIdentifier = nodeIdentifier;
+
+      if (isNode() && this.version.toString() === '1') {
+        /* Obviously we can't serialize state to file in the browser. */
+        writeNewResults(this);
+      }
     }
-
-    this.__timestamp = timestamp;
-
-    const nodeIdentifier = options.nodeIdentifierGetter(version);
-    if (!isSixBytesInHex(nodeIdentifier)) {
-      throw new Error(strings.NODE_IDENTIFIER_INVALID);
-    }
-
-    this.__nodeIdentifier = nodeIdentifier;
   }
 
   private __version: TUUIDVersion;
