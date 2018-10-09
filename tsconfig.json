@@ -16,7 +16,8 @@
     "preserveConstEnums":               true,
     "removeComments":                   true,
     "sourceMap":                        false,
-    "strict":                           true
+    "strict":                           true,
+    "target":                           "es6"
   },
 
   "exclude": [ "src/**/*.test.*" ],

@@ -8,6 +8,9 @@ import {
   IUUIDOptions,
 } from './IUUIDOptions';
 import {
+  NamespaceIds,
+} from '../../Enums/NamespaceIds';
+import {
   nodeIdentifierGetter,
 } from '../../nodeIdentifierGetter';
 import {
@@ -21,23 +24,51 @@ import {
 } from '../../TypeAliases/TUUIDVersion';
 
 export class UUIDOptions implements IUUIDOptions {
-  skipCreation = false;
   version: TUUIDVersion = '4';
+  clockSequenceGetter = clockSequenceGetter;
+  nodeIdentifierGetter = nodeIdentifierGetter;
+  timestampGetter = timestampGetter;
+  name?: string;
+  namespaceId?: NamespaceIds;
 
-  constructor(version?: TUUIDVersion) {
-    if ('0' in arguments && !isUUIDVersion(version)) {
-      throw new Error(strings.UUID_VERSION_INVALID);
+  constructor(_args: { [key: string]: any } = {}) {
+    const args = _args || {};
+    if (args.version) {
+      if (!isUUIDVersion(args.version)) {
+        throw new Error(strings.UUID_VERSION_INVALID);
+      }
+
+      this.version = args.version;
     }
 
-    this.version = version || this.version;
-    if (/^[^1345]$/.test(this.version)) {
-      throw new Error(strings.UUID_VERSION_INVALID);
+    if (typeof args.clockSequenceGetter === 'function') {
+      this.clockSequenceGetter = args.clockSequenceGetter;
+    }
+
+    if (typeof args.nodeIdentifierGetter === 'function') {
+      this.nodeIdentifierGetter = args.nodeIdentifierGetter; 
+    }
+
+    if (typeof args.timestampGetter === 'function') {
+      this.timestampGetter = args.timestampGetter;
+    }
+
+    if (args.name && typeof args.name === 'string') {
+      this.name = args.name;
+    }
+
+    if (args.namespaceId && typeof args.namespaceId === 'string') {
+      this.namespaceId = args.namespaceId as NamespaceIds;
+    }
+
+    if (/^[35]$/.test(this.version.toString())) {
+      if (!this.namespaceId) {
+        throw new Error(strings.NAMESPACE_ID_MISSING);
+      } else if (!this.name) {
+        throw new Error(strings.NAME_MISSING);
+      }
     }
   }
-
-  timestampGetter      = timestampGetter;
-  nodeIdentifierGetter = nodeIdentifierGetter;
-  clockSequenceGetter  = clockSequenceGetter;
 }
 
 export default UUIDOptions;

@@ -1,27 +1,6 @@
 import {
-  isFourBytesInHex,
-} from '../TypeGuards/isFourBytesInHex';
-import {
-  isFourteenBits,
-} from '../TypeGuards/isFourteenBits';
-import {
-  isOneByteInHex,
-} from '../TypeGuards/isOneByteInHex';
-import {
-  isSixBytesInHex,
-} from '../TypeGuards/isSixBytesInHex';
-import {
-  isSixtyBitsInHex,
-} from '../TypeGuards/isSixtyBitsInHex';
-import {
-  isTwelveBitsInHex,
-} from '../TypeGuards/isTwelveBitsInHex';
-import {
-  isTwoBytesInHex,
-} from '../TypeGuards/isTwoBytesInHex';
-import {
-  isUUIDOptions,
-} from '../TypeGuards/isUUIDOptions';
+  isNode,
+} from '../isNode';
 import {
   isUUIDVersion,
 } from '../TypeGuards/isUUIDVersion';
@@ -32,35 +11,23 @@ import {
   IUUIDOptions,
 } from './UUIDOptions/IUUIDOptions';
 import {
+  numberAsLittleEndianHexStr,
+} from '../numberAsLittleEndianHexStr';
+import {
   strings,
 } from '../strings';
-import {
-  TFourBytesInHex,
-} from '../TypeAliases/TFourBytesInHex';
-import {
-  TFourteenBits,
-} from '../TypeAliases/TFourteenBits';
-import {
-  TOneByteInHex,
-} from '../TypeAliases/TOneByteInHex';
-import {
-  TSixBytesInHex,
-} from '../TypeAliases/TSixBytesInHex';
-import {
-  TSixtyBitsInHex,
-} from '../TypeAliases/TSixtyBitsInHex';
-import {
-  TTwelveBitsInHex,
-} from '../TypeAliases/TTwelveBitsInHex';
-import {
-  TTwoBytesInHex,
-} from '../TypeAliases/TTwoBytesInHex';
 import {
   TUUIDVersion,
 } from '../TypeAliases/TUUIDVersion';
 import {
+  uintArrayAsNumber,
+} from '../uintArrayAsNumber';
+import {
   UUIDOptions,
-} from './UUIDOptions/UUIDOptions';;
+} from './UUIDOptions/UUIDOptions';
+import {
+  writeNewResults,
+} from '../writeNewResults';
 
 /* The formal Augmented Backus-Naur Form grammar for UUIDs is as follows,
  * courtesy RFC-4112:
@@ -84,7 +51,7 @@ import {
  *          "A" / "B" / "C" / "D" / "E" / "F"
  */
 export class UUID implements IUUID {
-  constructor(options?: Partial<IUUIDOptions>) {
+  constructor(options?: IUUIDOptions) {
     const opts = new UUIDOptions();
 
     if (typeof options === 'object' && options) {
@@ -108,22 +75,22 @@ export class UUID implements IUUID {
         opts.namespaceId = options.namespaceId;
       }
 
-    if (!isUUIDOptions(options)) {
-      throw new Error(strings.UUID_OPTIONS_INVALID);
+      if (options.name) {
+        opts.name = options.name;
+      }
     }
 
-    const version = options.version;
+    const version = opts.version;
     if (!isUUIDVersion(version)) {
       throw new Error(strings.UUID_VERSION_INVALID);
     }
 
-    this.__version = version;
-
-    /* Clock sequence is highly dependent on other values and their 
-     * availability, so it should be generated first. */
-    const clockSequence = options.clockSequenceGetter(version);
-    if (!isFourteenBits(clockSequence)) {
-      throw new Error(strings.CLOCK_SEQUENCE_INVALID);
+    if (!isNode()) {
+      if (version.toString() === '1') {
+        console.error('The time-based version 1 UUID cannot be created ' +
+                      'within the browser. Falling back to the ' +
+                      'pseudo-random version 4.');
+      }
     }
 
     this.__version = version;
@@ -138,13 +105,13 @@ export class UUID implements IUUID {
       );
 
       this.__clockSequence = clockSequence;
-
+      
       const timestamp = opts.timestampGetter(
         version,
         opts.namespaceId,
         opts.name,
       );
-
+      
       this.__timestamp = timestamp;
 
       const nodeIdentifier = opts.nodeIdentifierGetter(
@@ -157,171 +124,151 @@ export class UUID implements IUUID {
     } else {
       const clockSequence = opts.clockSequenceGetter(version);
       this.__clockSequence = clockSequence;
-
+      
       const timestamp = opts.timestampGetter(version);
       this.__timestamp = timestamp;
-
+      
       const nodeIdentifier = opts.nodeIdentifierGetter(version);
       this.__nodeIdentifier = nodeIdentifier;
-
+      
       if (isNode() && this.version.toString() === '1') {
-        /* Obviously we can't serialize state to file in the browser. */
         writeNewResults(this);
       }
     }
+
+    /* Obviously we can't serialize state to file in the browser. */
   }
 
+  /* Parsed into 4 bits. */
   private __version: TUUIDVersion;
   get version(): TUUIDVersion {
     return this.__version;
   }
 
-  private __timestamp: TSixtyBitsInHex;
-  get timestamp(): TSixtyBitsInHex {
+  /* 60 bits */
+  private __timestamp: Uint8Array;
+  get timestamp(): Uint8Array {
     return this.__timestamp;
   }
 
-  get timeLow(): TFourBytesInHex {
-    const timeLow = <TFourBytesInHex>this.timestamp.slice(7, 15);
-    if (!isFourBytesInHex(timeLow)) {
-      throw new Error(strings.TIME_LOW_INVALID);
-    }
-
+  /* 4 bytes */
+  get timeLow(): Uint8Array {
+    const timeLow = this.timestamp.slice(4, 8);
     return timeLow;
   }
 
-  get timeMid(): TTwoBytesInHex {
-    const timeMid = <TTwoBytesInHex>this.timestamp.slice(3, 7);
-    if (!isTwoBytesInHex(timeMid)) {
-      throw new Error(strings.TIME_MID_INVALID);
-    }
-
+  /* 2 bytes */
+  get timeMid(): Uint8Array {
+    const timeMid = this.timestamp.slice(2, 4);
     return timeMid;
   }
 
-  get timeHigh(): TTwelveBitsInHex {
-    const timeHigh = <TTwelveBitsInHex>this.timestamp.slice(0, 3);
-    if (!isTwelveBitsInHex(timeHigh)) {
-      throw new Error(strings.TIME_HIGH_INVALID);
-    }
-
+  /* 12 bits */
+  get timeHigh(): Uint8Array {
+    const timeHigh = this.timestamp.slice(0, 2);
     return timeHigh;
   }
 
-  get timeHighAndVersion(): TTwoBytesInHex {
-    const _timeHigh = parseInt(this.timeHigh.join(''), 16);
-    const _version = parseInt(this.version, 16) << 12;
-    const highAndVersion = _timeHigh | _version;
-    const timeHighAndVersion = <TTwoBytesInHex>highAndVersion
-      .toString(16)
-      .split('');
-
-    if (!isTwoBytesInHex(timeHighAndVersion)) {
-      throw new Error(strings.TIME_HIGH_AND_VERSION_INVALID);
-    }
-
-    return timeHighAndVersion;
+  /* 2 bytes */
+  get timeHighAndVersion(): Uint8Array {
+    const timeHigh = this.timeHigh;
+    const version = parseInt(this.version.toString()).toString(2);
+    const timeHighNum = uintArrayAsNumber(timeHigh).toString(2);
+    const binStr = version.padStart(4, '0') + timeHighNum.padStart(12, '0');
+    const firstByte = parseInt(binStr.slice(0, 8), 2);
+    const secondByte = parseInt(binStr.slice(8, 16), 2);
+    return new Uint8Array([ firstByte, secondByte, ]);
   }
 
-  private __clockSequence: TFourteenBits;
-  get clockSequence(): TFourteenBits {
+  /* 14 bits */
+  private __clockSequence: Uint8Array;
+  get clockSequence(): Uint8Array {
     return this.__clockSequence;
   }
-  
-  get clockSequenceLow(): TOneByteInHex {
-    const low = parseInt(this.clockSequence.join(''), 2) >> 8;
-    const clockSequenceLow = <TOneByteInHex>low.toString(16).split('');
 
-    /* Left-pad with necessary zeroes. */
-    for (let ii = clockSequenceLow.length; ii < 2; ii += 1) {
-      clockSequenceLow.unshift('0');
-    }
-
-    if (!isOneByteInHex(clockSequenceLow)) {
-      throw new Error(strings.CLOCK_SEQUENCE_LOW_INVALID);
-    }
-
-    return clockSequenceLow;
+  /* 1 byte */
+  get clockSequenceLow(): Uint8Array {
+    return this.clockSequence.slice(0, 1);
   }
 
-  get clockSequenceHigh(): TOneByteInHex {
-    const high = (parseInt(this.clockSequence.join(''), 2) & 0x3F00) >> 8;
-    const clockHigh = <TOneByteInHex>high.toString(16).split('');
-
-    /* Left-pad with necessary zeroes. */
-    for (let ii = clockHigh.length; ii < 2; ii += 1) {
-      clockHigh.unshift('0');
-    }
-
-    if (!isOneByteInHex(clockHigh)) {
-      throw new Error(strings.CLOCK_SEQUENCE_HIGH_INVALID);
-    }
-
-    return clockHigh;
+  /* 1 byte */
+  get clockSequenceHigh(): Uint8Array {
+    return this.clockSequence.slice(1);
   }
 
-  get reserved(): [ '0', '8' ] {
-    return [ '0', '8', ];
+  get reserved(): Uint8Array {
+    return new Uint8Array([ 2, ]);
   }
 
-  get clockSequenceHighAndReserved(): TOneByteInHex {
-    const _clockHigh = parseInt(this.clockSequenceHigh.join(''), 16);
-    const _reserved = parseInt(this.reserved.join(''), 16);
-    const high = _clockHigh | _reserved;
-    const clockHigh = <TOneByteInHex>high.toString(16).split('');
-
-    /* Left-pad with necessary zeroes. */
-    for (let ii = clockHigh.length; ii < 2; ii += 1) {
-      clockHigh.unshift('0');
-    }
-
-    if (!isOneByteInHex(clockHigh)) {
-      throw new Error(strings.CLOCK_HIGH_AND_RESERVED_INVALID);
-    }
-
-    return clockHigh;
+  get clockSequenceHighAndReserved(): Uint8Array {
+    const clockHigh = uintArrayAsNumber(this.clockSequenceHigh).toString(2);
+    const reserved = uintArrayAsNumber(this.reserved).toString(2);
+    const byte = clockHigh.padStart(6, '0') + reserved.padStart(2, '0');
+    return new Uint8Array([ parseInt(byte, 2), ]);
   }
 
-  private __nodeIdentifier: TSixBytesInHex;
-  get nodeIdentifier(): TSixBytesInHex {
+  /* 6 bytes */
+  private __nodeIdentifier: Uint8Array;
+  get nodeIdentifier(): Uint8Array {
     return this.__nodeIdentifier;
   }
 
+  /* text: e.g. 103314af-205e-0080-002b-7cd2a900a098 */
   static parse(text: string): IUUID {
     const split = text.split('-');
     if (split.length !== 5) {
       throw new Error(strings.UUID_STRING_INVALID);
     }
 
-    const version = <TUUIDVersion>parseInt(split[2], 16).toString();
-    if (!isUUIDVersion(version)) {
-      throw new Error(strings.UUID_VERSION_INVALID);
+    const leHexToBeHex = (leHex: string) => (
+      parseInt(
+        parseInt(leHex, 16).toString(2).split('').reverse().join(),
+        2
+      ).toString(16)
+    );
+
+    const timeLow = leHexToBeHex(split[0]);
+    const timeMid = leHexToBeHex(split[1]);
+    const timeHighAndVersion = leHexToBeHex(split[2]);
+
+    const timeHigh = timeHighAndVersion.slice(0, 3);
+    const version = timeHighAndVersion[4];
+
+    const timestampHex = timeHigh + timeMid + timeLow;
+    const timestampArr = [];
+    for (let ii = 0; ii < 16; ii += 2) {
+      timestampArr.push(parseInt(timestampHex.slice(ii, ii + 2), 16));
     }
 
-    const tsNum = parseInt(split[0] + split[1] + split[2], 16);
-    const num = (tsNum >> 64);
-    const ts = 0 |
-      ((num & 0x0000000000000fff) << 48) |
-      ((num & 0x00000000ffff0000) << 16) |
-      ((num & 0xffffffff00000000) >> 32);
+    const timestamp = new Uint8Array(timestampArr);
 
-    const timestamp = <TSixtyBitsInHex>ts.toString(16).split('');
-    if (!isSixtyBitsInHex(timestamp)) {
-      throw new Error(strings.TIMESTAMP_INVALID);
+    const clockSequenceHighAndReservedAndLow = leHexToBeHex(split[3]);
+    const clockSequenceHighAndReservedHex =
+      clockSequenceHighAndReservedAndLow.slice(0, 2);
+    const clockSequenceHighHex =
+      parseInt(
+        parseInt(clockSequenceHighAndReservedHex, 16).toString(2).slice(2),
+        2
+      ).toString(16);
+
+    const clockSequenceLowHex =
+      clockSequenceHighAndReservedAndLow.slice(2, 4);
+
+    const clockSequenceHex = clockSequenceLowHex + clockSequenceHighHex;
+    const clockSequenceArr = [];
+    for (let ii = 0; ii < 7; ii += 2) {
+      clockSequenceArr.push(parseInt(clockSequenceHex.slice(ii, ii + 2), 16));
     }
 
-    const csHighReserved = parseInt(split[3].slice(0, split[3].length / 2), 16);
-    const csLow = parseInt(split[3].slice(split[3].length / 2), 16);
-    const cs = (csHighReserved << 8) | csLow;
-    const clockSequence = <TFourteenBits>cs.toString(2).split('');
-    if (!isFourteenBits(clockSequence)) {
-      throw new Error(strings.CLOCK_SEQUENCE_INVALID);
+    const clockSequence = new Uint8Array(clockSequenceArr);
+
+    const nodeIdentifierHex = leHexToBeHex(split[4]);
+    const nodeIdentifierArr = [];
+    for (let ii = 0; ii < 12; ii += 2) {
+      nodeIdentifierArr.push(parseInt(nodeIdentifierHex.slice(ii, ii + 2), 16));
     }
 
-    const nodeIdentifier = <TSixBytesInHex>split[4].split('');
-    if (!isSixBytesInHex(nodeIdentifier)) {
-      throw new Error(strings.NODE_IDENTIFIER_INVALID);
-    }
+    const nodeIdentifier = new Uint8Array(nodeIdentifierArr);
 
     return Object.assign({}, this.prototype, {
       __version: version,
@@ -332,16 +279,24 @@ export class UUID implements IUUID {
   }
 
   toString(): string {
-    return this.timeLow.join('') +
+    const format = (value: Uint8Array, toPad: number = 0) => (
+      numberAsLittleEndianHexStr(uintArrayAsNumber(value))
+        /* Pad any missing most-significant-digits. */
+        .padEnd(toPad, '0')
+    );
+
+    return (
+      format(this.timeLow, 8) +
       '-' +
-      this.timeMid.join('') +
+      format(this.timeMid, 4) +
       '-' +
-      this.timeHighAndVersion.join('') +
+      format(this.timeHighAndVersion, 4) +
       '-' +
-      this.clockSequenceHighAndReserved.join('') +
-      this.clockSequenceLow.join('') +
+      format(this.clockSequenceHighAndReserved, 2) +
+      format(this.clockSequenceLow, 2) +
       '-' +
-      this.nodeIdentifier.join('');
+      format(this.nodeIdentifier, 12)
+    );
   }
 }
 

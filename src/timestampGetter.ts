@@ -8,8 +8,14 @@ import {
   getHundredsOfNanosecondsSinceGregorianReform,
 } from './getHundredsOfNanosecondsSinceGregorianReform';
 import {
+  isUUIDVersion,
+} from './TypeGuards/isUUIDVersion';
+import {
   lastResults,
 } from './lastResults';
+import {
+  NamespaceIds,
+} from './Enums/NamespaceIds';
 import {
   randomBytesGenerator,
 } from './randomBytesGenerator';
@@ -17,42 +23,40 @@ import {
   strings,
 } from './strings';
 import {
-  TBit,
-} from './TypeAliases/TBit';
-import {
-  TFourteenBits,
-} from './TypeAliases/TFourteenBits';
+  TUUIDVersion,
+} from './TypeAliases/TUUIDVersion';
 import {
   uintArrayAsNumber,
 } from './uintArrayAsNumber';
 
-export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
-  const _lastResults = <TUUIDLastResults>lastResults;
-  const timestamp = _lastResults.timestamp;
-  const clockSequence = _lastResults.clockSequence;
-  let newTimestamp: TSixtyBitsInHex;
-  if (version === '1' && isSixtyBitsInHex(timestamp)) {
-    const lastTimestamp = parseInt(timestamp.join(''), 16);
+export function timestampGetter(
+  version: TUUIDVersion,
+  namespaceId?: NamespaceIds,
+  name?: string,
+): Uint8Array
+{
+  if (!isUUIDVersion(version)) {
+    throw new Error(strings.UUID_VERSION_INVALID);
+  }
+  
+  let timestamp: Uint8Array;
+  if (version.toString() === '1') {
+    const oldTimestamp = lastResults.timestamp;
     const currentTimestamp = getHundredsOfNanosecondsSinceGregorianReform();
     /* Check if the last recorded timestamp is after the current time. */
-    if (lastTimestamp > currentTimestamp && isFourteenBits(clockSequence)) {
+    if ((oldTimestamp && 'BYTES_PER_ELEMENT' in oldTimestamp) &&
+        (uintArrayAsNumber(oldTimestamp) > currentTimestamp) &&
+        (lastResults.clockSequence && 'BYTES_PER_ELEMENT' in lastResults.clockSequence))
+    {
       /* Increment the clock sequence given that the timestamp is invalid. */
-      _lastResults.clockSequence = ((): TFourteenBits => {
-        const csNum = parseInt(clockSequence.join(''), 2) + 1;
-        if (csNum > parseInt('11111111111111', 2)) {
-          /* Prevent overflowing 14-bit space. */
-          return <TFourteenBits>'00000000000000'.split('');
-        } else {
-          return <TFourteenBits>csNum.toString(2).split('');
-        }
-      })();
+      lastResults.clockSequence[1] += 1;
     }
 
-    /* Return the current timestamp. */
-    newTimestamp = <TSixtyBitsInHex>currentTimestamp.toString(16).split('');
-    /* Left-pad timestamp up to 15 digits. */
-    for (let ii = newTimestamp.length; ii < 15; ii += 1) {
-      newTimestamp.unshift('0');
+    const timestampStr = currentTimestamp.toString(2).padStart(60, '0');
+    const inputArr = [];
+    for (let ii = 60; ii > 0; ii -= 8) {
+      const byte = timestampStr.slice(ii - 8, ii).padStart(8, '0');
+      inputArr.unshift(parseInt(byte, 2));
     }
 
     timestamp = new Uint8Array(inputArr);
@@ -81,8 +85,8 @@ export function timestampGetter(version: TUUIDVersion): TSixtyBitsInHex {
     timestamp[7] = parseInt(timestamp[7].toString(2).slice(0, 4), 2);
   }
 
-  _lastResults.timestamp = newTimestamp;
-  return newTimestamp;
+  lastResults.timestamp = timestamp;
+  return timestamp;
 }
 
 export default timestampGetter;

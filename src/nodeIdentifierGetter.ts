@@ -1,7 +1,6 @@
 import {
-  networkInterfaces,
-} from 'os';
-
+  convertBinStrToUint8Array,
+} from './convertBinStrToUint8Array';
 import {
   getHashFromNamespaceIdAndName,
 } from './getHashFromNamespaceIdAndName';
@@ -9,8 +8,11 @@ import {
   getMAC,
 } from './getMAC';
 import {
-  isSixBytesInHex,
-} from './TypeGuards/isSixBytesInHex';
+  lastResults,
+} from './lastResults';
+import {
+  NamespaceIds,
+} from './Enums/NamespaceIds';
 import {
   randomBytesGenerator,
 } from './randomBytesGenerator';
@@ -18,19 +20,21 @@ import {
   strings,
 } from './strings';
 import {
-  TBit,
-} from './TypeAliases/TBit';
-import {
-  TSixBytesInHex,
-} from './TypeAliases/TSixBytesInHex';
-import {
   TUUIDVersion,
 } from './TypeAliases/TUUIDVersion';
 
-export function nodeIdentifierGetter(version: TUUIDVersion): TSixBytesInHex {
-  if (/^1$/.test(version)) { /* Create the node ID from the system time. */
-    if (typeof networkInterfaces !== 'function') {
-      throw new Error(strings.MAC_ADDRESS_UNAVAILABLE);
+export function nodeIdentifierGetter(
+  version: TUUIDVersion,
+  namespaceId?: NamespaceIds,
+  name?: string,
+): Uint8Array
+{
+  let nodeIdentifier: Uint8Array;
+  if (version.toString() === '1') { /* Create the node ID from the system time. */
+    if (lastResults.nodeIdentifier &&
+        'BYTES_PER_ELEMENT' in lastResults.nodeIdentifier)
+    {
+      return lastResults.nodeIdentifier;
     }
 
     nodeIdentifier = getMAC();
@@ -56,6 +60,8 @@ export function nodeIdentifierGetter(version: TUUIDVersion): TSixBytesInHex {
   } else {
     throw new Error(strings.UUID_VERSION_INVALID);
   }
+
+  return nodeIdentifier;
 }
 
 export default nodeIdentifierGetter;
