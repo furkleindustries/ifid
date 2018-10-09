@@ -120,7 +120,12 @@ export class IFID implements IIFID {
           throw new Error(strings.NAME_MISSING);
         }
 
-        this.__uuid = new UUID();
+        if (this.version === IFIDVersions.UUIDv3) {
+          this.__uuid = uuidGenerator(3, options.namespaceId, options.name);
+        } else {
+          /* v5 */
+          this.__uuid = uuidGenerator(5, options.namespaceId, options.name);
+        }
       } else if (this.version === IFIDVersions.UUIDv4) {
         this.__uuid = uuidGenerator(4);
       } else if (this.version === IFIDVersions.FileBasedMD5) {
