@@ -51,7 +51,7 @@ import {
  *          "A" / "B" / "C" / "D" / "E" / "F"
  */
 export class UUID implements IUUID {
-  constructor(options?: IUUIDOptions) {
+  constructor(options?: Partial<IUUIDOptions>) {
     const opts = new UUIDOptions();
 
     if (typeof options === 'object' && options) {

@@ -1,4 +1,7 @@
 import {
+  AGTVersions,
+} from '../Enums/AGTVersions';
+import {
   createHash,
 } from 'crypto';
 import {
@@ -14,11 +17,17 @@ import {
   IIFIDOptions,
 } from './IIFIDOptions';
 import {
+  isAGTVersion,
+} from '../TypeGuards/isAGTVersion';
+import {
   isIFIDVersion,
 } from '../TypeGuards/isIFIDVersion';
 import {
   IUUID,
 } from '../UUID/IUUID';
+import {
+  MagneticScrollsDocumentedTitles,
+} from '../Enums/MagneticScrollsDocumentedTitles';
 import {
   NamespaceIds,
 } from '../Enums/NamespaceIds';
@@ -28,10 +37,20 @@ import {
 import {
   UUID,
 } from '../UUID/UUID';
-import { isAGTVersion } from '../TypeGuards/isAGTVersion';
-import { AGTVersions } from '../Enums/AGTVersions';
 
 export const strings = {
+  AGT_SIGNATURE_INVALID:
+    'The agtSignature option was missing from the options object. This ' +
+    'property is needed for legacy AGT IFIDs.',
+
+  AGT_VERSION_INVALID:
+    'The agtVersion option was missing from the options object. This ' +
+    'property is needed for legacy AGT IFIDs.',
+
+  CHECKSUM_MISSING:
+    'The checksum property was missing from the options object. This ' +
+    'property is needed for post-1990 Z-Code IFIDs.',
+
   FILEPATH_MISSING:
     'An IFID version was selected requiring hashing a file, but no filepath ' +
     'was provided in the options object.',
@@ -41,6 +60,19 @@ export const strings = {
 
   NAMESPACE_ID_MISSING:
     'The namespace ID was not provided for the v3/5 UUID to be generated.',
+
+  RELEASE_NUMBER_MISSING:
+    'The releaseNumber property was missing from the options object. This ' +
+    'property is needed for Z-Code IFIDs.',
+
+  SERIAL_CODE_MISSING:
+    'The serialCode property was missing from the options object. This ' +
+    'property is needed for Z-Code IFIDs.',
+
+  UNRECOGNIZED_DOCUMENTED_MAGNETIC_SCROLLS_TITLE:
+    'The title provided for a Magnetic Scrolls IFID was not recognized. An ' +
+    'IFID should be constructed using the undocumented Magnetic Scrolls ' +
+    'IFID pattern instead.',
 
   UUID_INVALID:
     'The UUID was not properly generated for the IFID before being requested.',
@@ -86,9 +118,9 @@ export class IFID implements IIFID {
     }
 
     if (IFID.isUUIDVersion(this.version)) {
-      const uuidGenerator = (() => {
+      const uuidGenerator: (version: TUUIDVersion, namespaceId?: NamespaceIds, name?: string) => IUUID = (() => {
         if (options && typeof options.uuidGenerator === 'function') {
-          return (version: TUUIDVersion) => options.uuidGenerator!(version);
+          return options.uuidGenerator;
         } else {
           return (version: TUUIDVersion, namespaceId?: NamespaceIds, name?: string) => (
             new UUID({
@@ -102,7 +134,7 @@ export class IFID implements IIFID {
 
       const fileGetter = (() => {
         if (options && typeof options.fileGetter === 'function') {
-          return (path: string) => options.fileGetter!(path);
+          return options.fileGetter;
         } else {
           return (path: string) => readFileSync(path);
         }
@@ -170,6 +202,7 @@ export class IFID implements IIFID {
 
         this.__id = `ZCODE-${options.releaseNumber}-${options.serialCode}-${options.checksum}`;
       } else if (
+        /* All FORMAT-MD, where MD is the MD5 digest. */
         this.version === IFIDVersions.LegacyTADS2 ||
         this.version === IFIDVersions.LegacyTADS3 ||
         this.version === IFIDVersions.LegacyHugo ||
@@ -183,7 +216,6 @@ export class IFID implements IIFID {
         this.version === IFIDVersions.PreOSX ||
         this.version === IFIDVersions.ALAN)
       {
-        /* All FORMAT-MD, where MD is the MD5 digest. */
         if (!options || !options.filepath) {
           throw new Error(strings.FILEPATH_MISSING);
         }
@@ -199,19 +231,19 @@ export class IFID implements IIFID {
         }
 
         const name = options.name.toLowerCase();
-        if (name === 'the pawn') {
+        if (name === MagneticScrollsDocumentedTitles.ThePawn) {
           this.__id = 'MAGNETIC-1';
-        } else if (name === 'guild of thieves') {
+        } else if (name === MagneticScrollsDocumentedTitles.GuildOfThieves) {
           this.__id = 'MAGNETIC-2';
-        } else if (name === 'jinxter') {
+        } else if (name === MagneticScrollsDocumentedTitles.Jinxter) {
           this.__id = 'MAGNETIC-3';
-        } else if (name === 'corruption') {
+        } else if (name === MagneticScrollsDocumentedTitles.Corruption) {
           this.__id = 'MAGNETIC-4';
-        } else if (name === 'fish!') {
+        } else if (name === MagneticScrollsDocumentedTitles.Fish) {
           this.__id = 'MAGNETIC-5';
-        } else if (name === 'myth') {
+        } else if (name === MagneticScrollsDocumentedTitles.Myth) {
           this.__id = 'MAGNETIC-6';
-        } else if (name === 'wonderland') {
+        } else if (name === MagneticScrollsDocumentedTitles.Wonderland) {
           this.__id = 'MAGNETIC-7';
         } else {
           throw new Error(strings.UNRECOGNIZED_DOCUMENTED_MAGNETIC_SCROLLS_TITLE);
@@ -259,11 +291,11 @@ export class IFID implements IIFID {
           agtId += '08300';
         } else if (agtVer === AGTVersions.ME_1_0) {
           agtId += '10000';
-        } else if (agtId === AGTVersions.ME_1_5) {
+        } else if (agtVer === AGTVersions.ME_1_5) {
           agtId += '15000';
-        } else if (agtId === AGTVersions.ME_1_6) {
+        } else if (agtVer === AGTVersions.ME_1_6) {
           agtId += '16000';
-        } else if (agtId === AGTVersions.Magx_0_0) {
+        } else if (agtVer === AGTVersions.Magx_0_0) {
           agtId += '20000';
         }
   
