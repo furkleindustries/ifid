@@ -2,8 +2,8 @@ import {
   convertBinStrToUint8Array,
 } from './convertBinStrToUint8Array';
 import {
-  createHash,
-} from 'crypto';
+  getHashFromNamespaceIdAndName,
+} from './getHashFromNamespaceIdAndName';
 import {
   getMAC,
 } from './getMAC';
@@ -40,22 +40,11 @@ export function nodeIdentifierGetter(
     nodeIdentifier = getMAC();
     lastResults.nodeIdentifier = nodeIdentifier;
   } else if (/^[35]$/.test(version.toString())) {
-    if (!namespaceId) {
-      throw new Error(strings.NAMESPACE_ID_MISSING);
-    } else if (!name) {
-      throw new Error(strings.NAME_MISSING);
-    }
-
-    let hash: string;
-    let hasher;
-    if (version.toString() === '3') {
-      hasher = createHash('md5');
-    } else {
-      hasher = createHash('sha1');
-    }
-
-    hasher.update(namespaceId + name);
-    hash = hasher.digest('hex');
+    const hash = getHashFromNamespaceIdAndName(
+      version,
+      namespaceId!,
+      name!,
+    );
 
     let nodeIdentifierStr = '';
     

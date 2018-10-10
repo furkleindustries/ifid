@@ -1,6 +1,9 @@
 import {
-  createHash,
-} from 'crypto';
+  convertBinStrToUint8Array,
+} from './convertBinStrToUint8Array';
+import {
+  getHashFromNamespaceIdAndName,
+} from './getHashFromNamespaceIdAndName';
 import {
   getHundredsOfNanosecondsSinceGregorianReform,
 } from './getHundredsOfNanosecondsSinceGregorianReform';
@@ -25,7 +28,6 @@ import {
 import {
   uintArrayAsNumber,
 } from './uintArrayAsNumber';
-import { convertBinStrToUint8Array } from './convertBinStrToUint8Array';
 
 export function timestampGetter(
   version: TUUIDVersion,
@@ -58,25 +60,17 @@ export function timestampGetter(
     }
 
     timestamp = new Uint8Array(inputArr);
-  } else if (/^[35]$/.test(version.toString())) {
-    if (!name || typeof name !== 'string') {
-      throw new Error(strings.NAME_MISSING);
-    }
-
-    let hash: string;
-    let hasher;
-    if (version.toString() === '3') {
-      hasher = createHash('md5');
-    } else {
-      hasher = createHash('sha1');
-    }
-
-    hasher.update(namespaceId + name);
-    hash = hasher.digest('hex');
+  } else if (/^[35]$/.test(version.toString())) {    
+    /* Version is 3 or 5. */
+    const hash = getHashFromNamespaceIdAndName(
+      version,
+      namespaceId!,
+      name!,
+    );
 
     let timestampStr = '';
     /* time_low */
-    timestampStr = hash.slice(0, 8) + timestampStr;
+    timestampStr = hash.slice(0, 8);
     /* time_mid */
     timestampStr = hash.slice(8, 12) + timestampStr;
     /* time_hi */
