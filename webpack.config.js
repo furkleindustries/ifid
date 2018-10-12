@@ -3,12 +3,13 @@ const uglifyjs = require('uglifyjs-webpack-plugin');
 const webpack  = require('webpack');
 
 const baseConfig = {
-  entry: path.resolve(__dirname, 'dist/esnext.node/index.js'),
+  entry: path.resolve(__dirname, 'dist/node.esnext/index.js'),
   resolve: {
     extensions: [ '.ts', '.js', ],
   },
 
   node: {
+    crypto: 'empty',
     fs: 'empty',
   },
 
@@ -35,8 +36,9 @@ const baseConfig = {
 
 const esFiveBrowserConfig = Object.assign({}, baseConfig, {
   output: {
-    path: path.resolve(__dirname, 'dist/es5.browser/'),
+    path: path.resolve(__dirname, 'dist/browser.es5/'),
     filename: 'index.js',
+    library: 'ifid',
     libraryTarget: 'umd',
   },
 
@@ -45,7 +47,7 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
       {
         test: /\.[jt]s$/,
         include: [
-          path.resolve(__dirname, 'dist/esnext.node/'),
+          path.resolve(__dirname, 'dist/node.esnext/'),
         ],
 
         use: {
@@ -82,8 +84,9 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
 
 const esSixBrowserConfig = Object.assign({}, baseConfig, {
   output: {
-    path: path.resolve(__dirname, 'dist/es6.browser/'),
+    path: path.resolve(__dirname, 'dist/browser.es6/'),
     filename: 'index.js',
+    library: 'ifid',
     libraryTarget: 'umd',
   },
 
@@ -92,7 +95,7 @@ const esSixBrowserConfig = Object.assign({}, baseConfig, {
       {
         test: /\.[jt]s$/,
         include: [
-          path.resolve(__dirname, 'dist/esnext.node/'),
+          path.resolve(__dirname, 'dist/node.esnext/'),
         ],
 
         use: {

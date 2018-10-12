@@ -1,12 +1,9 @@
 import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
-import {
-  IUUID,
-} from '../UUID/IUUID';
 
 export interface IIFID {
-  uuid?: IUUID;
+  uuid?: { toString(): string, };
   version: IFIDVersions;
   toString(): string;
 }
