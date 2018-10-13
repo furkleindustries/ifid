@@ -53,5 +53,20 @@
   },
   "dependencies": {
     "big-uuid": "^0.1.6"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.{j,t}s?(x)"
+    ],
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest",
+      "^.+\\.tsx?$": "ts-jest"
+    }
   }
 }

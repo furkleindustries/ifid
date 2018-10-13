@@ -1,7 +1,4 @@
 import {
-  AGTVersions,
-} from '../Enums/AGTVersions';
-import {
   TNamespaceId,
   TUUIDVersion,
   UUID,
@@ -119,6 +116,10 @@ export class IFID implements IIFID {
     }
   }
 
+  toString(): string {
+    return this.id;
+  }
+
   constructor(options: Partial<IIFIDOptions>) {
     if (options) {
       if ('version' in options) {
@@ -234,7 +235,7 @@ export class IFID implements IIFID {
         throw new Error(strings.NAME_MISSING);
       }
 
-      const format = (str: string) => str.replace(/ \?!/g, '').toLowerCase()
+      const format = (str: string) => str.replace(/[ ?!]/g, '').toLowerCase()
 
       const name = options.name;
       if (name === MagneticScrollsDocumentedTitles.ThePawn ||
@@ -246,7 +247,7 @@ export class IFID implements IIFID {
       {
         this.__id = 'MAGNETIC-2';
       } else if (name === MagneticScrollsDocumentedTitles.Jinxter ||
-                 format(name) === 'jinxster')
+                 format(name) === 'jinxter')
       {
         this.__id = 'MAGNETIC-3';
       } else if (name === MagneticScrollsDocumentedTitles.Corruption ||
@@ -283,56 +284,21 @@ export class IFID implements IIFID {
     } else if (this.version === IFIDVersions.LegacyAGT) {
       if (!isAGTVersion(options.agtVersion)) {
         throw new Error(strings.AGT_VERSION_INVALID);
-      } else if (!options.agtSignature || options.agtSignature.length !== 8) {
+      } else if (typeof options.agtSignature !== 'string' ||
+                 !options.agtSignature ||
+                 options.agtSignature.length !== 8)
+      {
         throw new Error(strings.AGT_SIGNATURE_INVALID);
       }
 
       const agtVer = options.agtVersion;
-      let agtId = 'AGT-';
-      if (agtVer === AGTVersions.v1_0) {
-        agtId += '00000';
-      } else if (agtVer === AGTVersions.v1_18) {
-        agtId += '01800';
-      } else if (agtVer === AGTVersions.v1_19) {
-        agtId += '01900';
-      } else if (agtVer === AGTVersions.v1_20) {
-        agtId += '02000';
-      } else if (agtVer === AGTVersions.v1_32_COS) {
-        agtId += '03200';
-      } else if (agtVer === AGTVersions.v1_35) {
-        agtId += '03500';
-      } else if (agtVer === AGTVersions.v1_5H) {
-        agtId += '05000';
-      } else if (agtVer === AGTVersions.v1_5F) {
-        agtId += '05050';
-      } else if (agtVer === AGTVersions.v1_6) {
-        agtId += '05070';
-      } else if (agtVer === AGTVersions.v1_82) {
-        agtId += '08200';
-      } else if (agtVer === AGTVersions.v1_83) {
-        agtId += '08300';
-      } else if (agtVer === AGTVersions.ME_1_0) {
-        agtId += '10000';
-      } else if (agtVer === AGTVersions.ME_1_5) {
-        agtId += '15000';
-      } else if (agtVer === AGTVersions.ME_1_6) {
-        agtId += '16000';
-      } else if (agtVer === AGTVersions.Magx_0_0) {
-        agtId += '20000';
-      }
-
-      if (options.agtLargeOrSoggy) {
-        agtId = agtId.slice(0, -1) + '1';
-      }
-
-      agtId += `-${options.agtSignature}`;
+      let agtId =
+        'AGT-' +
+        (options.agtLargeOrSoggy ? agtVer.slice(0, -1) + '1' : agtVer) +
+        `-${options.agtSignature}`;
       
       this.__id = agtId;
     }
-  }
-
-  toString(): string {
-    return this.id;
   }
 }
 
