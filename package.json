@@ -5,17 +5,17 @@
   "main": "dist/node.es6/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "npm run build-node && npm run build-browser && npm run build-declaration-file",
+    "build": "cross-env NODE_ENV=production npm run build-node && npm run build-browser && npm run build-declaration-file",
     "build-node": "npm run build-node-esnext && npm run build-node-es6 && npm run build-node-es5",
     "build-node-esnext": "tsc --project tsconfig.esnext.json",
     "build-node-es6": "tsc --project tsconfig.es6.json",
     "build-node-es5": "tsc --project tsconfig.es5.json",
     "build-declaration-file": "tsc --project tsconfig.d.json && copy dist\\node.esnext\\index.d.ts src\\ && copy src\\index.d.ts dist\\node.es6 && copy src\\index.d.ts dist\\node.es5",
     "build-browser": "webpack --display-modules",
-    "test": "jest",
-    "test-coverage": "jest --coverage",
-    "test-watch": "jest --watch",
-    "test-coverage-watch": "jest --watch --coverage"
+    "test": "cross-env NODE_ENV=test jest",
+    "test-coverage": "npm run test -- --coverage",
+    "test-watch": "npm run test -- --watch",
+    "test-coverage-watch": "npm run test -- --watch --coverage"
   },
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-jest": "^23.2.0",
     "babel-preset-minify": "^0.2.0",
+    "cross-env": "^5.2.0",
     "jest": "^21.2.1",
     "ts-jest": "^21.2.4",
     "typescript": "^2.6.2",

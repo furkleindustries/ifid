@@ -15,9 +15,8 @@
     "noUnusedParameters":               true,
     "preserveConstEnums":               true,
     "removeComments":                   true,
-    "sourceMap":                        false,
     "strict":                           true,
-    "target":                           "es6"
+    "target":                           "esnext"
   },
 
   "exclude": [ "src/**/*.test.*" ],

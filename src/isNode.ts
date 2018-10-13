@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 export const isNode = () => Boolean(typeof process !== 'undefined' &&
                                     process.versions &&
                                     process.versions.node);

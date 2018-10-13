@@ -1,13 +1,21 @@
 {
   "presets": [
-    "env",
-    "react",
-    "stage-0"
+    [
+      "env",
+      {
+        "targets": {
+          "modules": false,
+          "node": "current",
+          "useBuiltins": true
+        }
+      }
+    ],
+
+    "stage-2"
   ],
+
   "plugins": [
-    "transform-class-properties",
-    "transform-decorators",
-    "transform-react-constant-elements",
-    "transform-react-inline-elements"
+    "transform-es2015-destructuring",
+    "transform-object-rest-spread"
   ]
 }
