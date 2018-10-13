@@ -15,3 +15,5 @@ export enum AGTVersions {
   ME_1_6 = '16000',
   Magx_0_0 = '20000',
 }
+
+export default AGTVersions;
