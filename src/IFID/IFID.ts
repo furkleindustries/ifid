@@ -1,10 +1,11 @@
 import {
   TNamespaceId,
   TUUIDVersion,
+  uintArrayAsNumber,
   UUID,
 } from 'big-uuid';
 import {
-  createHash,
+  createHash as _createHash,
 } from 'crypto';
 import {
   IFIDVersions,
@@ -62,6 +63,9 @@ export const strings = {
 
   NAMESPACE_ID_MISSING:
     'The namespace ID was not provided for the v3/5 UUID to be generated.',
+
+  NO_HASHER_FOUND:
+    'No suitable hashing function could be found.',
 
   RELEASE_NUMBER_MISSING:
     'The releaseNumber property was missing from the options object. This ' +
@@ -134,6 +138,86 @@ export class IFID implements IIFID {
             version,
           })
         );
+      }
+    })();
+
+    /* istanbul ignore next */
+    const createHash: any = (() => {
+      if (isNode()) {
+        return _createHash;
+      } else {
+        const getBufferFromText = (str: string) => {
+          // @ts-ignore
+          if (window.TextEncoder) {
+            // @ts-ignore
+            return new TextEncoder('utf-8').encode(str);
+          }
+
+          var utf8 = unescape(encodeURIComponent(str));
+          var result = new Uint8Array(utf8.length);
+          for (let ii = 0; ii < utf8.length; ii++) {
+            result[ii] = utf8.charCodeAt(ii);
+          }
+
+          return result;
+        };
+
+        // @ts-ignore
+        if ((window as any).msCrypto) {
+          return (algorithm: string) => {
+            if (algorithm === 'md5') {
+              throw new Error(strings.MD5_IN_BROWSER);
+            }
+
+            // @ts-ignore
+            const hasher = {
+              __payload: null,
+
+              update(payload: string | ArrayBuffer | DataView) {
+                hasher.__payload = payload as any;
+                return hasher;
+              },
+
+              async digest() {
+                // @ts-ignore
+                const buffer = getBufferFromText(str);
+                // @ts-ignore
+                return uintArrayAsNumber((window as any).msCrypto.subtle.digest('SHA-256', buffer)).toString(16);
+              },
+            };
+
+            return hasher;
+          };
+        }
+        // @ts-ignore
+        else if ((window as any).crypto) {
+          return (algorithm: string) => {            
+            if (algorithm === 'md5') {
+              throw new Error(strings.MD5_IN_BROWSER);
+            }
+
+            // @ts-ignore
+            const hasher = {
+              __payload: '',
+
+              update(payload: string | ArrayBuffer | DataView) {
+                hasher.__payload = payload as any;
+                return hasher;
+              },
+
+              async digest() {
+                // @ts-ignore
+                const buffer = getBufferFromText(str);
+                // @ts-ignore
+                return uintArrayAsNumber(await (window as any).crypto.subtle.digest('SHA-256', buffer)).toString(16);
+              },
+            };
+
+            return hasher;
+          };
+        } else {
+          throw new Error(strings.NO_HASHER_FOUND);
+        }
       }
     })();
 

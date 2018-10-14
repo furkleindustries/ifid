@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "allowJs": false,
-    "declaration": true,
-    "outDir": "dist/node.esnext",
-    "target": "esnext"
-  }
-}
