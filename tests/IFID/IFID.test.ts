@@ -3,7 +3,9 @@ import {
   strings,
 } from '../../src/IFID/IFID';
 import {
-  IFIDVersions, MagneticScrollsDocumentedTitles, AGTVersions,
+  AGTVersions,
+  IFIDVersions,
+  MagneticScrollsDocumentedTitles,
 } from '../../src';
 
 import {
@@ -28,11 +30,6 @@ import {
 jest.mock('crypto');
 
 import {
-  readFileSync,
-} from 'fs';
-jest.mock('fs');
-
-import {
   isAGTVersion,
 } from '../../src/TypeGuards/isAGTVersion';
 jest.mock('../../src/TypeGuards/isAGTVersion');
@@ -53,7 +50,6 @@ describe('General IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (isNode as any).mockClear();
     (createHash as any).mockClear();
-    (readFileSync as any).mockClear();
   });
 
   it('The __version property is emitted through the version getter.', () => {
@@ -104,7 +100,10 @@ describe('General IFID tests.', () => {
   });
 
   it('If the version is not set, default to IFIDVersions.UUID.', () => {
-    expect(new IFID({}).version).toBe(IFIDVersions.UUID);
+    expect(
+      // @ts-ignore
+      new IFID()
+        .version).toBe(IFIDVersions.UUID);
   });
 
   it('If the version is set in the options argument, set it in the object.', () => {
@@ -127,34 +126,6 @@ describe('General IFID tests.', () => {
     const ifid = new IFID({ uuidGenerator: func as any, });
     expect(ifid.uuid).toBe(sym);
   });
-
-  it('Uses fs.readFileSync to get files by default.', () => {
-    const sym = Symbol();
-    new IFID({
-      version: IFIDVersions.FileBasedMD5,
-      filepath: sym as any,
-    });
-
-    expect((readFileSync as any).mock.calls).toEqual([
-      [ sym, ],
-    ]);
-  });
-
-  it('Allows the user to provide a file getter in the options object.', () => {
-    (createHash as any).mockImplementationOnce(() => ({ digest: jest.fn(), update: jest.fn(), }))
-
-    const sym = Symbol();
-    const func = jest.fn();
-    new IFID({
-      version: IFIDVersions.FileBasedMD5,
-      fileGetter: func as any,
-      filepath: sym as any,
-    });
-
-    expect(func.mock.calls).toEqual([
-      [ sym, ],
-    ]);
-  });
 });
 
 describe('UUID IFID tests.', () => {
@@ -168,7 +139,6 @@ describe('UUID IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (isNode as any).mockClear();
     (createHash as any).mockClear();
-    (readFileSync as any).mockClear();
   });
 
   it('Passes 1 or "1" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
@@ -243,7 +213,6 @@ describe('Generic file-based IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (isNode as any).mockClear();
     (createHash as any).mockClear();
-    (readFileSync as any).mockClear();
   });
 
   it('Throws if the version is IFIDVersions.FileBasedMD5 but the filepath option is not provided.', () => {
@@ -252,25 +221,14 @@ describe('Generic file-based IFID tests.', () => {
 
   it('Throws if the version is IFIDVersion.FileBasedMD5 but isNode is false.', () => {
     (isNode as any).mockImplementationOnce(() => false);
-    const func = () => new IFID({ version: IFIDVersions.FileBasedMD5, filepath: 'foo', });
+    const func = () => new IFID({ version: IFIDVersions.FileBasedMD5, fileContents: 'foo', });
     expect(func).toThrow(strings.MD5_IN_BROWSER);
-  });
-
-  it('Calls the fileGetter with the filepath as an argument.', () => {
-    new IFID({
-      version: IFIDVersions.FileBasedMD5,
-      filepath: 'foobar',
-    });
-
-    expect((readFileSync as any).mock.calls).toEqual([
-      [ 'foobar', ],
-    ]);
   });
 
   it('Passes the md5 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.FileBasedMD5,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect((createHash as any).mock.calls).toEqual([
@@ -284,25 +242,14 @@ describe('Generic file-based IFID tests.', () => {
 
   it('Throws if the version is IFIDVersion.FileBasedSHA but isNode is false.', () => {
     (isNode as any).mockImplementationOnce(() => false);
-    const func = () => new IFID({ version: IFIDVersions.FileBasedSHA, filepath: 'foo', });
+    const func = () => new IFID({ version: IFIDVersions.FileBasedSHA, fileContents: 'foo', });
     expect(func).toThrow(strings.FILE_GET_IN_BROWSER);
-  });
-
-  it('Calls the fileGetter with the filepath as an argument.', () => {
-    new IFID({
-      version: IFIDVersions.FileBasedSHA,
-      filepath: 'foobar',
-    });
-
-    expect((readFileSync as any).mock.calls).toEqual([
-      [ 'foobar', ],
-    ]);
   });
 
   it('Passes the sha228 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.FileBasedSHA,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect((createHash as any).mock.calls).toEqual([
@@ -318,7 +265,7 @@ describe('Generic file-based IFID tests.', () => {
     
     const ifid = new IFID({
       version: IFIDVersions.FileBasedSHA,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect(ifid.id.length).toBe(63);
@@ -402,7 +349,6 @@ describe('FORMAT-MD IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (isNode as any).mockClear();
     (createHash as any).mockClear();
-    (readFileSync as any).mockClear();
     (isFormatMDVersion as any).mockClear();
   });
 
@@ -420,27 +366,16 @@ describe('FORMAT-MD IFID tests.', () => {
 
     const func = () => new IFID({
       version: IFIDVersions.LegacyTADS2,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect(func).toThrow(strings.MD5_IN_BROWSER);
   });
 
-  it('Calls the fileGetter with the filepath as an argument.', () => {
-    new IFID({
-      version: IFIDVersions.LegacyHugo,
-      filepath: 'foobar',
-    });
-
-    expect((readFileSync as any).mock.calls).toEqual([
-      [ 'foobar', ],
-    ]);
-  });
-
   it('Passes the md5 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.ELF,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect((createHash as any).mock.calls).toEqual([
@@ -456,7 +391,7 @@ describe('FORMAT-MD IFID tests.', () => {
 
     expect(new IFID({
       version: IFIDVersions.Java,
-      filepath: 'foozle',
+      fileContents: 'foozle',
     }).id).toBe('JAVA-TESTHASH');
   });
 });
@@ -622,7 +557,6 @@ describe('Undocumented Magnetic Scrolls IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (isNode as any).mockClear();
     (createHash as any).mockClear();
-    (readFileSync as any).mockClear();
   });
 
   it('Throws if the filepath option is not provided.', () => {
@@ -634,27 +568,16 @@ describe('Undocumented Magnetic Scrolls IFID tests.', () => {
 
     const func = () => new IFID({
       version: IFIDVersions.UndocumentedMagneticScrolls,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect(func).toThrow(strings.MD5_IN_BROWSER);
   });
 
-  it('Calls the fileGetter with the filepath as an argument.', () => {
-    new IFID({
-      version: IFIDVersions.UndocumentedMagneticScrolls,
-      filepath: 'foobar',
-    });
-
-    expect((readFileSync as any).mock.calls).toEqual([
-      [ 'foobar', ],
-    ]);
-  });
-
   it('Passes the md5 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.UndocumentedMagneticScrolls,
-      filepath: 'foobar',
+      fileContents: 'foobar',
     });
 
     expect((createHash as any).mock.calls).toEqual([
@@ -670,7 +593,7 @@ describe('Undocumented Magnetic Scrolls IFID tests.', () => {
 
     expect(new IFID({
       version: IFIDVersions.UndocumentedMagneticScrolls,
-      filepath: 'foozle',
+      fileContents: 'foozle',
     }).id).toBe('MAGNETIC-TESTHASH');
   });
 });

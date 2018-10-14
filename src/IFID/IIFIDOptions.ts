@@ -13,7 +13,7 @@ export interface IIFIDOptions {
   version: IFIDVersions;
 
   /* To be used for any version that requires getting the digest of a file. */
-  filepath?: string;
+  fileContents?: string | Buffer | DataView;
 
   /* To be used for UUIDv3 and UUIDv5. */
   name?: string;
@@ -31,7 +31,6 @@ export interface IIFIDOptions {
   agtSignature?: string;
   agtLargeOrSoggy?: boolean;
 
-  fileGetter?: (path: string) => Buffer;
   uuidGenerator?: (version: TUUIDVersion) => { toString(): string };
 }
 

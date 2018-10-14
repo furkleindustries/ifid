@@ -12,7 +12,7 @@ describe('isAGTVersion tests.', () => {
 
   it('Returns true if the provided argument is a member of the AGTVersions enum', () => {
     let failed = false;
-    (Object as any).values(AGTVersions).forEach((version) => {
+    (Object as any).values(AGTVersions).forEach((version: AGTVersions) => {
       if (!isAGTVersion(version)) {
         failed = true;
       }

@@ -1,8 +1,7 @@
 const path     = require('path');
-const uglifyjs = require('uglifyjs-webpack-plugin');
-const webpack  = require('webpack');
 
 const baseConfig = {
+  mode: 'production',
   entry: path.resolve(__dirname, 'dist/node.esnext/index.js'),
   resolve: {
     extensions: [ '.ts', '.js', ],
@@ -12,10 +11,6 @@ const baseConfig = {
     crypto: 'empty',
     fs: 'empty',
   },
-
-  plugins: [
-    new uglifyjs({ sourceMap: true, }),
-  ],
 
   performance: {
     hints: 'warning',
@@ -53,9 +48,10 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
         use: {
           loader: 'babel-loader',
           options: {
+            babelrc: false,
             presets: [
               [
-                'env',
+                '@babel/preset-env',
 
                 {
                   targets: {
@@ -68,12 +64,6 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
                   modules: false,
                 },
               ],
-
-              'stage-1',
-            ],
-
-            plugins: [
-              'transform-object-assign',
             ],
           },
         },
@@ -101,9 +91,10 @@ const esSixBrowserConfig = Object.assign({}, baseConfig, {
         use: {
           loader: 'babel-loader',
           options: {
+            babelrc: false,
             presets: [
               [
-                'env',
+                '@babel/preset-env',
 
                 {
                   targets: {
@@ -116,12 +107,6 @@ const esSixBrowserConfig = Object.assign({}, baseConfig, {
                   modules: false,
                 },
               ],
-
-              'stage-1',
-            ],
-
-            plugins: [
-              'transform-object-assign',
             ],
           },
         },
