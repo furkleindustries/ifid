@@ -12,7 +12,7 @@ describe('isIFIDVersion tests.', () => {
 
   it('Returns true if the provided argument is a member of the IFIDVersions enum', () => {
     let failed = false;
-    (Object as any).values(IFIDVersions).forEach((version) => {
+    (Object as any).values(IFIDVersions).forEach((version: IFIDVersions) => {
       if (!isIFIDVersion(version)) {
         failed = true;
       }

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs":                          true,
     "downlevelIteration":               true,
+    "esModuleInterop":                  true,
     "forceConsistentCasingInFileNames": true,
     "jsx":                              "preserve",
     "lib":                              [

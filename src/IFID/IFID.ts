@@ -7,9 +7,6 @@ import {
   createHash,
 } from 'crypto';
 import {
-  readFileSync,
-} from 'fs';
-import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
 import {
@@ -89,7 +86,7 @@ export const strings = {
 
   VERSION_INVALID:
     'The version property of the provided argument object did not meet the ' +
-    'isIFIDVersion type guard.',
+    'isIFIDVersion type guard, or is not implemented.',
 };
 
 export class IFID implements IIFID {
@@ -145,14 +142,7 @@ export class IFID implements IIFID {
       }
     })();
 
-    const fileGetter = (() => {
-      if (options && typeof options.fileGetter === 'function') {
-        return options.fileGetter;
-      } else {
-        return (path: string) => readFileSync(path);
-      }
-    })();
-
+    /* istanbul ignore else */ 
     if (this.version === IFIDVersions.UUIDv1) {
       this.__uuid = uuidGenerator(1);
     } else if (
@@ -174,26 +164,24 @@ export class IFID implements IIFID {
     } else if (this.version === IFIDVersions.UUIDv4) {
       this.__uuid = uuidGenerator(4);
     } else if (this.version === IFIDVersions.FileBasedMD5) {
-      if (!options.filepath) {
+      if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
       } else if (!isNode()) {
         throw new Error(strings.MD5_IN_BROWSER);
       }
 
-      const fileContents = fileGetter(options.filepath);
       const hasher = createHash('md5');
-      hasher.update(fileContents);
+      hasher.update(options.fileContents);
       this.__id = hasher.digest('hex');
     } else if (this.version === IFIDVersions.FileBasedSHA) {
-      if (!options.filepath) {
+      if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
       } else if (!isNode()) {
         throw new Error(strings.FILE_GET_IN_BROWSER);
       }
 
-      const fileContents = fileGetter(options.filepath);
       const hasher = createHash('sha228');
-      hasher.update(fileContents);
+      hasher.update(options.fileContents);
       const hashed = hasher.digest('hex');
       if (hashed.length > 63) {
         this.__id = hashed.slice(0, 63);
@@ -219,15 +207,14 @@ export class IFID implements IIFID {
 
       this.__id = `ZCODE-${options.releaseNumber}-${options.serialCode}-${options.checksum}`;
     } else if (isFormatMDVersion(this.version)) {
-      if (!options.filepath) {
+      if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
       } else if (!isNode()) {
         throw new Error(strings.MD5_IN_BROWSER);
       }
 
-      const fileContents = fileGetter(options.filepath);
       const hasher = createHash('md5');
-      hasher.update(fileContents);
+      hasher.update(options.fileContents);
       const hashed = hasher.digest('hex');
       this.__id = `${this.version}-${hashed}`;
     } else if (this.version === IFIDVersions.DocumentedMagneticScrolls) {
@@ -270,15 +257,14 @@ export class IFID implements IIFID {
         throw new Error(strings.UNRECOGNIZED_DOCUMENTED_MAGNETIC_SCROLLS_TITLE);
       }
     } else if (this.version === IFIDVersions.UndocumentedMagneticScrolls) {
-      if (!options.filepath) {
+      if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
       } else if (!isNode()) {
         throw new Error(strings.MD5_IN_BROWSER);
       }
 
-      const fileContents = fileGetter(options.filepath);
       const hasher = createHash('md5');
-      hasher.update(fileContents);
+      hasher.update(options.fileContents);
       const hashed = hasher.digest('hex');
       this.__id = `MAGNETIC-${hashed}`;
     } else if (this.version === IFIDVersions.LegacyAGT) {
