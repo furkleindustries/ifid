@@ -47,11 +47,6 @@ export const strings = {
     'The checksum property was missing from the options object. This ' +
     'property is needed for post-1990 Z-Code IFIDs.',
 
-  FILE_GET_IN_BROWSER:
-    'There is no direct file access in the browser, therefore any ' +
-    'IFID-generating method which relies on file access will fail in the ' +
-    'browser.',
-
   FILEPATH_MISSING:
     'An IFID version was selected requiring hashing a file, but no filepath ' +
     'was provided in the options object.',
@@ -176,8 +171,6 @@ export class IFID implements IIFID {
     } else if (this.version === IFIDVersions.FileBasedSHA) {
       if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.FILE_GET_IN_BROWSER);
       }
 
       const hasher = createHash('sha228');

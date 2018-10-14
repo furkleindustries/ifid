@@ -240,12 +240,6 @@ describe('Generic file-based IFID tests.', () => {
     expect(() => new IFID({ version: IFIDVersions.FileBasedSHA, })).toThrow(strings.FILEPATH_MISSING);
   });
 
-  it('Throws if the version is IFIDVersion.FileBasedSHA but isNode is false.', () => {
-    (isNode as any).mockImplementationOnce(() => false);
-    const func = () => new IFID({ version: IFIDVersions.FileBasedSHA, fileContents: 'foo', });
-    expect(func).toThrow(strings.FILE_GET_IN_BROWSER);
-  });
-
   it('Passes the sha228 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.FileBasedSHA,
