@@ -240,14 +240,14 @@ describe('Generic file-based IFID tests.', () => {
     expect(() => new IFID({ version: IFIDVersions.FileBasedSHA, })).toThrow(strings.FILEPATH_MISSING);
   });
 
-  it('Passes the sha228 argument to the hasher when creating.', () => {
+  it('Passes the sha256 argument to the hasher when creating.', () => {
     new IFID({
       version: IFIDVersions.FileBasedSHA,
       fileContents: 'foobar',
     });
 
     expect((createHash as any).mock.calls).toEqual([
-      [ 'sha228', ],
+      [ 'sha256', ],
     ]);
   });
 

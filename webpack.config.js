@@ -3,7 +3,6 @@ const path = require('path');
 const mode = process.env.NODE_ENV === 'development' ? 'development' : 'production';
 const baseConfig = {
   mode,
-  target: 'node',
   entry: path.resolve(__dirname, 'dist/node.esnext/index.js'),
   resolve: {
     extensions: [ '.ts', '.js', ],
@@ -34,10 +33,11 @@ const baseConfig = {
 
 const esFiveBrowserConfig = Object.assign({}, baseConfig, {
   output: {
-    path: path.resolve(__dirname, 'dist/umd/'),
+    path: path.resolve(__dirname, 'dist/browser/'),
     filename: 'index.js',
     library: 'ifid',
     libraryTarget: 'umd',
+    globalObject: 'this',
   },
 
   module: {

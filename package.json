@@ -2,11 +2,14 @@
   "name": "ifid",
   "version": "0.2.2",
   "description": "A package to generate Interactive Fiction Identifiers.",
-  "main": "dist/umd/index.js",
+  "main": "dist/node.es6/index.js",
+  "browser": "dist/browser/index.js",
   "types": "src/index.d.ts",
   "scripts": {
     "build": "cross-env NODE_ENV=production npm run build-node && npm run build-browser && npm run copy-declaration-file",
-    "build-node": "tsc",
+    "build-node": "npm run build-node-esnext && npm run build-node-es6",
+    "build-node-esnext": "tsc",
+    "build-node-es6": "tsc --project tsconfig.es6.json",
     "copy-declaration-file": "copy dist\\node.esnext\\index.d.ts src\\",
     "build-browser": "webpack -p --display-modules --display-error-details",
     "build-browser:dev": "cross-env NODE_ENV=development webpack --display-modules --display-error-details",
@@ -33,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
+    "@types/crypto-js": "^3.1.43",
     "@types/jest": "^23.3.5",
     "@types/node": "^10.11.7",
     "babel-env": "^2.4.1",
@@ -47,7 +51,8 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "big-uuid": "^0.1.6"
+    "big-uuid": "^0.2.4",
+    "crypto-js": "^3.1.9-1"
   },
   "jest": {
     "moduleFileExtensions": [

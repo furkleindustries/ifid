@@ -1,12 +1,8 @@
 import {
   TNamespaceId,
   TUUIDVersion,
-  uintArrayAsNumber,
   UUID,
 } from 'big-uuid';
-import {
-  createHash as _createHash,
-} from 'crypto';
 import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
@@ -29,11 +25,12 @@ import {
   isUUIDTypeIFIDVersion,
 } from '../TypeGuards/isUUIDTypeIFIDVersion';
 import {
-  isNode,
-} from '../isNode';
-import {
   MagneticScrollsDocumentedTitles,
 } from '../Enums/MagneticScrollsDocumentedTitles';
+
+const SHA224 = require('crypto-js/sha224');
+const MD5 = require('crypto-js/md5');
+const hex = require('crypto-js/enc-hex');
 
 export const strings = {
   AGT_SIGNATURE_INVALID:
@@ -51,12 +48,6 @@ export const strings = {
   FILEPATH_MISSING:
     'An IFID version was selected requiring hashing a file, but no filepath ' +
     'was provided in the options object.',
-
-  MD5_IN_BROWSER:
-    'MD5 is a completely outmoded and infeasible digest algorithm. While ' +
-    'it has been provided for reverse-compatibility with the majority of ' +
-    'Treaty of Babel in the Node.js version of this library, MD5 is not ' +
-    'included in browsers by default and will not be added for this library.',
 
   NAME_MISSING:
     'The name argument was not provided in the argument object.',
@@ -141,86 +132,6 @@ export class IFID implements IIFID {
       }
     })();
 
-    /* istanbul ignore next */
-    const createHash: any = (() => {
-      if (isNode()) {
-        return _createHash;
-      } else {
-        const getBufferFromText = (str: string) => {
-          // @ts-ignore
-          if (window.TextEncoder) {
-            // @ts-ignore
-            return new TextEncoder('utf-8').encode(str);
-          }
-
-          var utf8 = unescape(encodeURIComponent(str));
-          var result = new Uint8Array(utf8.length);
-          for (let ii = 0; ii < utf8.length; ii++) {
-            result[ii] = utf8.charCodeAt(ii);
-          }
-
-          return result;
-        };
-
-        // @ts-ignore
-        if ((window as any).msCrypto) {
-          return (algorithm: string) => {
-            if (algorithm === 'md5') {
-              throw new Error(strings.MD5_IN_BROWSER);
-            }
-
-            // @ts-ignore
-            const hasher = {
-              __payload: null,
-
-              update(payload: string | ArrayBuffer | DataView) {
-                hasher.__payload = payload as any;
-                return hasher;
-              },
-
-              async digest() {
-                // @ts-ignore
-                const buffer = getBufferFromText(str);
-                // @ts-ignore
-                return uintArrayAsNumber((window as any).msCrypto.subtle.digest('SHA-256', buffer)).toString(16);
-              },
-            };
-
-            return hasher;
-          };
-        }
-        // @ts-ignore
-        else if ((window as any).crypto) {
-          return (algorithm: string) => {            
-            if (algorithm === 'md5') {
-              throw new Error(strings.MD5_IN_BROWSER);
-            }
-
-            // @ts-ignore
-            const hasher = {
-              __payload: '',
-
-              update(payload: string | ArrayBuffer | DataView) {
-                hasher.__payload = payload as any;
-                return hasher;
-              },
-
-              async digest() {
-                // @ts-ignore
-                const buffer = getBufferFromText(str);
-                // @ts-ignore
-                return uintArrayAsNumber(await (window as any).crypto.subtle.digest('SHA-256', buffer)).toString(16);
-              },
-            };
-
-            return hasher;
-          };
-        } else {
-          throw new Error(strings.NO_HASHER_FOUND);
-        }
-      }
-    })();
-
     /* istanbul ignore else */ 
     if (this.version === IFIDVersions.UUIDv1) {
       this.__uuid = uuidGenerator(1);
@@ -245,21 +156,17 @@ export class IFID implements IIFID {
     } else if (this.version === IFIDVersions.FileBasedMD5) {
       if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
       }
-
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      this.__id = hasher.digest('hex');
+    
+      const hash = MD5(options.fileContents);
+      this.__id = hex.stringify(hash);
     } else if (this.version === IFIDVersions.FileBasedSHA) {
       if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
       }
 
-      const hasher = createHash('sha228');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = SHA224(options.fileContents);
+      const hashed = hex.stringify(hash);
       if (hashed.length > 63) {
         this.__id = hashed.slice(0, 63);
       } else {
@@ -286,13 +193,10 @@ export class IFID implements IIFID {
     } else if (isFormatMDVersion(this.version)) {
       if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
       }
 
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = MD5(options.fileContents);
+      const hashed = hex.stringify(hash);
       this.__id = `${this.version}-${hashed}`;
     } else if (this.version === IFIDVersions.DocumentedMagneticScrolls) {
       if (!options.name) {
@@ -336,13 +240,10 @@ export class IFID implements IIFID {
     } else if (this.version === IFIDVersions.UndocumentedMagneticScrolls) {
       if (!options.fileContents) {
         throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
       }
 
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = MD5(options.fileContents);
+      const hashed = hex.stringify(hash);
       this.__id = `MAGNETIC-${hashed}`;
     } else if (this.version === IFIDVersions.LegacyAGT) {
       if (!isAGTVersion(options.agtVersion)) {

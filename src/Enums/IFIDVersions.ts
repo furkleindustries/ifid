@@ -5,9 +5,9 @@ export enum IFIDVersions {
   UUIDv3 = 'UUIDv3',
   UUIDv4 = 'UUIDv4',
   UUIDv5 = 'UUIDv5',
-  FileBased = 'SHA228',
+  FileBased = 'SHA256',
   FileBasedMD5 = 'MD5',
-  FileBasedSHA = 'SHA228',
+  FileBasedSHA = 'SHA256',
 
   /* Unlikely to be used, but provided for conformance with the Treaty of
    * Babel, rev. 9. */

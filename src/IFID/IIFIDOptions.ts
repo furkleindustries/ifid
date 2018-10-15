@@ -13,7 +13,7 @@ export interface IIFIDOptions {
   version: IFIDVersions;
 
   /* To be used for any version that requires getting the digest of a file. */
-  fileContents?: string | Buffer | DataView;
+  fileContents?: string;
 
   /* To be used for UUIDv3 and UUIDv5. */
   name?: string;
