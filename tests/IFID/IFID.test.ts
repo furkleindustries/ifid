@@ -22,7 +22,6 @@ import {
 } from 'big-uuid';
 cryptoJs.hex.stringify = jest.fn();
 cryptoJs.MD5 = jest.fn();
-cryptoJs.SHA1 = jest.fn();
 cryptoJs.SHA256 = jest.fn();
 
 import {
@@ -40,7 +39,6 @@ describe('General IFID tests.', () => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -48,7 +46,6 @@ describe('General IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -133,7 +130,6 @@ describe('UUID IFID tests.', () => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -141,7 +137,6 @@ describe('UUID IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -171,7 +166,6 @@ describe('Generic file-based IFID tests.', () => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -179,7 +173,6 @@ describe('Generic file-based IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -208,7 +201,6 @@ describe('Z-Code IFID tests.', () => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -216,7 +208,6 @@ describe('Z-Code IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -280,7 +271,6 @@ describe('FORMAT-MD IFID tests.', () => {
     (isFormatMDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -289,7 +279,6 @@ describe('FORMAT-MD IFID tests.', () => {
     (isFormatMDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -467,7 +456,6 @@ describe('Undocumented Magnetic Scrolls IFID tests.', () => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -475,7 +463,6 @@ describe('Undocumented Magnetic Scrolls IFID tests.', () => {
     (isIFIDVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
@@ -499,7 +486,6 @@ describe('Documented Magnetic Scrolls IFID tests.', () => {
     (isAGTVersion as any).mockImplementation(() => true);
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
-    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
@@ -508,7 +494,6 @@ describe('Documented Magnetic Scrolls IFID tests.', () => {
     (isAGTVersion as any).mockClear();
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
-    (cryptoJs.SHA1 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
   });
 
