@@ -1,6 +1,6 @@
 {
   "name": "ifid",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/node.es6/index.js",
   "browser": "dist/browser/index.js",
@@ -50,7 +50,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "big-uuid": "^0.4.2"
+    "big-uuid": "^0.3.6"
   },
   "jest": {
     "moduleFileExtensions": [

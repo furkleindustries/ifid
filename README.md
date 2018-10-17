@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/furkleindustries/ifid.svg?branch=master)](https://travis-ci.org/furkleindustries/ifid)
 
-# IFID
+# ifid
 
 ## Summary
 
