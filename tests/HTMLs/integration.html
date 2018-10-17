@@ -1,0 +1,87 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Hashing test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+
+  <body>
+    <script src="../../dist/browser/index.js"></script>
+    <script>
+    console.log('Default (v4 UUID)');
+    console.log(new ifid.IFID());
+
+    /* Don't use v3 or v5 for IFIDs. */
+    console.log('Default UUID (v4)');
+    console.log(new ifid.IFID({ version: ifid.IFIDVersions.UUID, }).id);
+
+    console.log('v1 UUID');
+    console.log(new ifid.IFID({ version: ifid.IFIDVersions.UUIDv1, }).id);
+
+    console.log('v4 UUID');
+    console.log(new ifid.IFID({ version: ifid.IFIDVersions.UUIDv4, }).id);
+
+    console.log('Default file-based (SHA)');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.FileBased,
+      fileContents: 'test',
+    }).id);
+    
+    console.log('File-based MD5');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.FileBasedMD5,
+      fileContents: 'test',
+    }).id);
+
+    console.log('File-based SHA');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.FileBasedSHA,
+      fileContents: 'test',
+    }).id);
+
+    console.log('Pre-1990 Z-code');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.Pre1990ZCode,
+      releaseNumber: '12',
+      serialCode: '120484',
+    }).id);
+
+    console.log('Post-1990 Z-code');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.Post1990ZCode,
+      releaseNumber: '12',
+      serialCode: '120484',
+      checksum: '63f0',
+    }).id);
+
+    console.log('FORMAT-MD');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.MSDOS,
+      fileContents: 'test',
+    }).id);
+
+    console.log('Documented Magnetic Scrolls');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.DocumentedMagneticScrolls,
+      name: ifid.MagneticScrollsDocumentedTitles.Jinxter,
+    }).id);
+
+    console.log('Legacy AGT');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.LegacyAGT,
+      agtVersion: ifid.AGTVersions.v1_20,
+      agtSignature: '49393020',
+    }).id);
+
+    console.log('Legacy AGT, large/soggy');
+    console.log(new ifid.IFID({
+      version: ifid.IFIDVersions.LegacyAGT,
+      agtVersion: ifid.AGTVersions.v1_20,
+      agtSignature: '49393020',
+      agtLargeOrSoggy: true,
+    }).id);
+    </script>
+  </body>
+</html>

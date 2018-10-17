@@ -1,17 +1,18 @@
 {
   "name": "ifid",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/node.es6/index.js",
+  "browser": "dist/browser/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "cross-env NODE_ENV=production npm run build-node && npm run build-browser && npm run build-declaration-file",
-    "build-node": "npm run build-node-esnext && npm run build-node-es6 && npm run build-node-es5",
-    "build-node-esnext": "tsc --project tsconfig.esnext.json",
+    "build": "cross-env NODE_ENV=production npm run build-node && npm run build-browser && npm run copy-declaration-file",
+    "build-node": "npm run build-node-esnext && npm run build-node-es6",
+    "build-node-esnext": "tsc",
     "build-node-es6": "tsc --project tsconfig.es6.json",
-    "build-node-es5": "tsc --project tsconfig.es5.json",
-    "build-declaration-file": "tsc --project tsconfig.d.json && copy dist\\node.esnext\\index.d.ts src\\ && copy src\\index.d.ts dist\\node.es6 && copy src\\index.d.ts dist\\node.es5",
-    "build-browser": "webpack --display-modules",
+    "copy-declaration-file": "copy dist\\node.esnext\\index.d.ts src\\",
+    "build-browser": "cross-env NODE_ENV=production webpack -p",
+    "build-browser:dev": "cross-env NODE_ENV=development webpack",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "npm run test -- --coverage",
     "test-watch": "npm run test -- --watch",
@@ -49,7 +50,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "big-uuid": "^0.1.6"
+    "big-uuid": "^0.3.6"
   },
   "jest": {
     "moduleFileExtensions": [

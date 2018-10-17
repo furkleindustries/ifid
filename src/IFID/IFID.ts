@@ -1,11 +1,12 @@
 import {
-  TNamespaceId,
+  /* Import required crypto-js libraries from `big-uuid` to reduce bundle size.
+   * This shouldn't be necessary but there's something weird about the way
+   * crypto-js modularizes its libraries and Typescript doesn't like it. */
+  cryptoJs,
+
   TUUIDVersion,
   UUID,
 } from 'big-uuid';
-import {
-  createHash,
-} from 'crypto';
 import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
@@ -28,9 +29,6 @@ import {
   isUUIDTypeIFIDVersion,
 } from '../TypeGuards/isUUIDTypeIFIDVersion';
 import {
-  isNode,
-} from '../isNode';
-import {
   MagneticScrollsDocumentedTitles,
 } from '../Enums/MagneticScrollsDocumentedTitles';
 
@@ -47,21 +45,18 @@ export const strings = {
     'The checksum property was missing from the options object. This ' +
     'property is needed for post-1990 Z-Code IFIDs.',
 
-  FILEPATH_MISSING:
-    'An IFID version was selected requiring hashing a file, but no filepath ' +
-    'was provided in the options object.',
-
-  MD5_IN_BROWSER:
-    'MD5 is a completely outmoded and infeasible digest algorithm. While ' +
-    'it has been provided for reverse-compatibility with the majority of ' +
-    'Treaty of Babel in the Node.js version of this library, MD5 is not ' +
-    'included in browsers by default and will not be added for this library.',
+  FILE_CONTENTS_MISSING:
+    'An IFID version was selected requiring hashing the contents of a file, ' +
+    'but no fileContents property was provided in the options object.',
 
   NAME_MISSING:
     'The name argument was not provided in the argument object.',
 
   NAMESPACE_ID_MISSING:
     'The namespace ID was not provided for the v3/5 UUID to be generated.',
+
+  NO_HASHER_FOUND:
+    'No suitable hashing function could be found.',
 
   RELEASE_NUMBER_MISSING:
     'The releaseNumber property was missing from the options object. This ' +
@@ -123,14 +118,12 @@ export class IFID implements IIFID {
       }
     }
 
-    const uuidGenerator: (version: TUUIDVersion, namespaceId?: TNamespaceId, name?: string) => { toString(): string, } = (() => {
+    const uuidGenerator: (version: TUUIDVersion) => { toString(): string, } = (() => {
       if (options && typeof options.uuidGenerator === 'function') {
         return options.uuidGenerator;
       } else {
-        return (version: TUUIDVersion, namespaceId?: TNamespaceId, name?: string) => (
+        return (version: TUUIDVersion) => (
           new UUID({
-            name,
-            namespaceId,
             version,
           })
         );
@@ -140,42 +133,22 @@ export class IFID implements IIFID {
     /* istanbul ignore else */ 
     if (this.version === IFIDVersions.UUIDv1) {
       this.__uuid = uuidGenerator(1);
-    } else if (
-      this.version === IFIDVersions.UUIDv3 ||
-      this.version === IFIDVersions.UUIDv5)
-    {
-      if (!options.namespaceId) {
-        throw new Error(strings.NAMESPACE_ID_MISSING);
-      } else if (!options.name) {
-        throw new Error(strings.NAME_MISSING);
-      }
-
-      if (this.version === IFIDVersions.UUIDv3) {
-        this.__uuid = uuidGenerator(3, options.namespaceId, options.name);
-      } else {
-        /* v5 */
-        this.__uuid = uuidGenerator(5, options.namespaceId, options.name);
-      }
     } else if (this.version === IFIDVersions.UUIDv4) {
       this.__uuid = uuidGenerator(4);
     } else if (this.version === IFIDVersions.FileBasedMD5) {
       if (!options.fileContents) {
-        throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
+        throw new Error(strings.FILE_CONTENTS_MISSING);
       }
-
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      this.__id = hasher.digest('hex');
+    
+      const hash = cryptoJs.MD5(options.fileContents);
+      this.__id = cryptoJs.hex.stringify(hash);
     } else if (this.version === IFIDVersions.FileBasedSHA) {
       if (!options.fileContents) {
-        throw new Error(strings.FILEPATH_MISSING);
+        throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hasher = createHash('sha228');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = cryptoJs.SHA256(options.fileContents);
+      const hashed = cryptoJs.hex.stringify(hash);
       if (hashed.length > 63) {
         this.__id = hashed.slice(0, 63);
       } else {
@@ -201,14 +174,11 @@ export class IFID implements IIFID {
       this.__id = `ZCODE-${options.releaseNumber}-${options.serialCode}-${options.checksum}`;
     } else if (isFormatMDVersion(this.version)) {
       if (!options.fileContents) {
-        throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
+        throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = cryptoJs.MD5(options.fileContents);
+      const hashed = cryptoJs.hex.stringify(hash);
       this.__id = `${this.version}-${hashed}`;
     } else if (this.version === IFIDVersions.DocumentedMagneticScrolls) {
       if (!options.name) {
@@ -251,14 +221,11 @@ export class IFID implements IIFID {
       }
     } else if (this.version === IFIDVersions.UndocumentedMagneticScrolls) {
       if (!options.fileContents) {
-        throw new Error(strings.FILEPATH_MISSING);
-      } else if (!isNode()) {
-        throw new Error(strings.MD5_IN_BROWSER);
+        throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hasher = createHash('md5');
-      hasher.update(options.fileContents);
-      const hashed = hasher.digest('hex');
+      const hash = cryptoJs.MD5(options.fileContents);
+      const hashed = cryptoJs.hex.stringify(hash);
       this.__id = `MAGNETIC-${hashed}`;
     } else if (this.version === IFIDVersions.LegacyAGT) {
       if (!isAGTVersion(options.agtVersion)) {

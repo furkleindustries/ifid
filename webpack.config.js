@@ -1,7 +1,8 @@
-const path     = require('path');
+const path = require('path');
 
+const mode = process.env.NODE_ENV === 'development' ? 'development' : 'production';
 const baseConfig = {
-  mode: 'production',
+  mode,
   entry: path.resolve(__dirname, 'dist/node.esnext/index.js'),
   resolve: {
     extensions: [ '.ts', '.js', ],
@@ -10,6 +11,7 @@ const baseConfig = {
   node: {
     crypto: 'empty',
     fs: 'empty',
+    process: false,
   },
 
   performance: {
@@ -17,13 +19,13 @@ const baseConfig = {
     maxAssetSize: 200000,
     maxEntrypointSize: 400000,
     assetFilter(assetFilename) {
-      return assetFilename.endsWith('.js') || assetFilename.endsWith('.ts');
+      return /\.[jt]$/.test(assetFilename);
     },
   },
 
   devtool: 'source-map',
   context: __dirname,
-  stats: 'errors-only',
+  stats: 'verbose',
   profile: false,
   bail: true,
   cache: false,
@@ -31,10 +33,11 @@ const baseConfig = {
 
 const esFiveBrowserConfig = Object.assign({}, baseConfig, {
   output: {
-    path: path.resolve(__dirname, 'dist/browser.es5/'),
+    path: path.resolve(__dirname, 'dist/browser/'),
     filename: 'index.js',
     library: 'ifid',
     libraryTarget: 'umd',
+    globalObject: 'this',
   },
 
   module: {
@@ -57,6 +60,7 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
                   targets: {
                     browsers: [
                       'ie >= 8',
+                      '> 1%'
                     ],
                   },
 
@@ -72,7 +76,8 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
   },
 });
 
-const esSixBrowserConfig = Object.assign({}, baseConfig, {
+// This is producing the exact same bundle size as the above es5 config.
+/*const esSixBrowserConfig = Object.assign({}, baseConfig, {
   output: {
     path: path.resolve(__dirname, 'dist/browser.es6/'),
     filename: 'index.js',
@@ -113,9 +118,9 @@ const esSixBrowserConfig = Object.assign({}, baseConfig, {
       },
     ],
   },
-});
+});*/
 
 module.exports = [
   esFiveBrowserConfig,
-  esSixBrowserConfig,
+  /*esSixBrowserConfig,*/
 ];
