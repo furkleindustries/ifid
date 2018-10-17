@@ -18,15 +18,7 @@ describe('isUUIDTypeIFIDVersion tests.', () => {
     expect(isUUIDTypeIFIDVersion(IFIDVersions.UUIDv1)).toBe(true);
   });
 
-  it('Returns true if the provided argument is IFIDVersions.UUIDv3.', () => {
-    expect(isUUIDTypeIFIDVersion(IFIDVersions.UUIDv3)).toBe(true);
-  });
-
   it('Returns true if the provided argument is IFIDVersions.UUIDv4.', () => {
     expect(isUUIDTypeIFIDVersion(IFIDVersions.UUIDv4)).toBe(true);
-  });
-
-  it('Returns true if the provided argument is IFIDVersions.UUIDv5.', () => {
-    expect(isUUIDTypeIFIDVersion(IFIDVersions.UUIDv5)).toBe(true);
   });
 });
