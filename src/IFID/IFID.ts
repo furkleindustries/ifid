@@ -31,6 +31,7 @@ import {
 import {
   MagneticScrollsDocumentedTitles,
 } from '../Enums/MagneticScrollsDocumentedTitles';
+import { isNode } from '../isNode';
 
 export const strings = {
   AGT_SIGNATURE_INVALID:
@@ -77,6 +78,9 @@ export const strings = {
   VERSION_INVALID:
     'The version property of the provided argument object did not meet the ' +
     'isIFIDVersion type guard, or is not implemented.',
+
+  VERSION_1_IN_BROWSER:
+    'The version 1 UUID cannot be constructed in the browser.',
 };
 
 export class IFID implements IIFID {
@@ -132,6 +136,10 @@ export class IFID implements IIFID {
 
     /* istanbul ignore else */ 
     if (this.version === IFIDVersions.UUIDv1) {
+      if (!isNode()) {
+        throw new Error(strings.VERSION_1_IN_BROWSER);
+      }
+
       this.__uuid = uuidGenerator(1);
     } else if (this.version === IFIDVersions.UUIDv4) {
       this.__uuid = uuidGenerator(4);

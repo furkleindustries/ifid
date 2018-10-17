@@ -4,7 +4,7 @@
 
 ## Summary
 
-An Interactive Fiction Identifier (IFID) generating class and helper functions. Implements both RFC 4112 UUIDs (versions 1, and 4), as well as essentially all of the Treaty of Babel, revision 9, as it applies to IFIDs. This package relies on the [big-uuid](https://github.com/furkleindustries/big-uuid) package for its generation of v1 and v4 UUIDs.
+An Interactive Fiction Identifier (IFID) generating class and helper functions. Implements both RFC 4112 UUIDs (versions 1 and 4), as well as essentially all of the Treaty of Babel, revision 9, as it applies to IFIDs. This package relies on the [big-uuid](https://github.com/furkleindustries/big-uuid) package for its generation of v1 and v4 UUIDs.
 
 ## Usage notes
 
