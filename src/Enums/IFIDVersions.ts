@@ -2,15 +2,13 @@ export enum IFIDVersions {
   /* Default to v4. */
   UUID = 'UUIDv4',
   UUIDv1 = 'UUIDv1',
-  UUIDv3 = 'UUIDv3',
   UUIDv4 = 'UUIDv4',
-  UUIDv5 = 'UUIDv5',
-  FileBased = 'SHA256',
-  FileBasedMD5 = 'MD5',
-  FileBasedSHA = 'SHA256',
-
+  FileBased = 'FileBasedSHA',
+  FileBasedSHA = 'FileBasedSHA',
+  
   /* Unlikely to be used, but provided for conformance with the Treaty of
-   * Babel, rev. 9. */
+  * Babel, rev. 9. */
+  FileBasedMD5 = 'FileBasedMD5',
   Pre1990ZCode = 'Pre1990ZCode',
   Post1990ZCode = 'Post1990ZCode',
   LegacyTADS2 = 'TADS2',

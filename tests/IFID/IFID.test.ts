@@ -17,17 +17,13 @@ import {
 } from '../../src/TypeGuards/isUUIDTypeIFIDVersion';
 jest.mock('../../src/TypeGuards/isUUIDTypeIFIDVersion');
 
-jest.mock('big-uuid');
-
 import {
-  isNode,
-} from '../../src/isNode';
-jest.mock('../../src/isNode');
-
-import {
-  createHash,
-} from 'crypto';
-jest.mock('crypto');
+  cryptoJs,
+} from 'big-uuid';
+cryptoJs.hex.stringify = jest.fn();
+cryptoJs.MD5 = jest.fn();
+cryptoJs.SHA1 = jest.fn();
+cryptoJs.SHA256 = jest.fn();
 
 import {
   isAGTVersion,
@@ -42,14 +38,18 @@ jest.mock('../../src/TypeGuards/isFormatMDVersion');
 describe('General IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
-    (createHash as any).mockImplementation(() => ({ digest: jest.fn(() => ''), update: jest.fn(), }));
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
-    (createHash as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('The __version property is emitted through the version getter.', () => {
@@ -131,14 +131,18 @@ describe('General IFID tests.', () => {
 describe('UUID IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
-    (createHash as any).mockImplementation(() => ({ digest: jest.fn(() => ''), update: jest.fn(), }));
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
-    (createHash as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('Passes 1 or "1" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
@@ -151,18 +155,6 @@ describe('UUID IFID tests.', () => {
     expect(uuidGenerator.mock.calls[0][0].toString()).toBe('1');
   });
 
-  it('Passes 3 or "3" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
-    const uuidGenerator = jest.fn();
-    new IFID({
-      version: IFIDVersions.UUIDv3,
-      uuidGenerator,
-      name: 'foo',
-      namespaceId: 'foobar' as any,
-    });
-
-    expect(uuidGenerator.mock.calls[0][0].toString()).toBe('3');
-  });
-
   it('Passes 4 or "4" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
     const uuidGenerator = jest.fn();
     new IFID({
@@ -172,91 +164,36 @@ describe('UUID IFID tests.', () => {
 
     expect(uuidGenerator.mock.calls[0][0].toString()).toBe('4');
   });
-
-  it('Passes 5 or "5" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
-    const uuidGenerator = jest.fn();
-    new IFID({
-      version: IFIDVersions.UUIDv5,
-      uuidGenerator,
-      name: 'foo',
-      namespaceId: 'foobar' as any,
-    });
-
-    expect(uuidGenerator.mock.calls[0][0].toString()).toBe('5');
-  });
-
-  it('Throws if the version is UUIDv3 and the namespaceId property is not in the options object.', () => {
-    expect(() => new IFID({ version: IFIDVersions.UUIDv3, })).toThrow(strings.NAMESPACE_ID_MISSING);
-  });
-
-  it('Throws if the version is UUIDv5 and the namespaceId property is not in the options object.', () => {
-    expect(() => new IFID({ version: IFIDVersions.UUIDv5, })).toThrow(strings.NAMESPACE_ID_MISSING);
-  });
-
-  it('Throws if the version is UUIDv3 and the name property is not in the options object.', () => {
-    expect(() => new IFID({ version: IFIDVersions.UUIDv3, namespaceId: 'foo', })).toThrow(strings.NAME_MISSING);
-  });
-
-  it('Throws if the version is UUIDv5 and the name property is not in the options object.', () => {
-    expect(() => new IFID({ version: IFIDVersions.UUIDv5, namespaceId: 'foo', })).toThrow(strings.NAME_MISSING);
-  });
 });
 
 describe('Generic file-based IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
-    (createHash as any).mockImplementation(() => ({ digest: jest.fn(() => ''), update: jest.fn(), }));
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
-    (createHash as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('Throws if the version is IFIDVersions.FileBasedMD5 but the filepath option is not provided.', () => {
-    expect(() => new IFID({ version: IFIDVersions.FileBasedMD5, })).toThrow(strings.FILEPATH_MISSING);
-  });
-
-  it('Throws if the version is IFIDVersion.FileBasedMD5 but isNode is false.', () => {
-    (isNode as any).mockImplementationOnce(() => false);
-    const func = () => new IFID({ version: IFIDVersions.FileBasedMD5, fileContents: 'foo', });
-    expect(func).toThrow(strings.MD5_IN_BROWSER);
-  });
-
-  it('Passes the md5 argument to the hasher when creating.', () => {
-    new IFID({
-      version: IFIDVersions.FileBasedMD5,
-      fileContents: 'foobar',
-    });
-
-    expect((createHash as any).mock.calls).toEqual([
-      [ 'md5', ],
-    ]);
+    expect(() => new IFID({ version: IFIDVersions.FileBasedMD5, })).toThrow(strings.FILE_CONTENTS_MISSING);
   });
 
   it('Throws if the version is IFIDVersions.FileBasedSHA but the filepath option is not provided.', () => {
-    expect(() => new IFID({ version: IFIDVersions.FileBasedSHA, })).toThrow(strings.FILEPATH_MISSING);
-  });
-
-  it('Passes the sha256 argument to the hasher when creating.', () => {
-    new IFID({
-      version: IFIDVersions.FileBasedSHA,
-      fileContents: 'foobar',
-    });
-
-    expect((createHash as any).mock.calls).toEqual([
-      [ 'sha256', ],
-    ]);
+    expect(() => new IFID({ version: IFIDVersions.FileBasedSHA, })).toThrow(strings.FILE_CONTENTS_MISSING);
   });
 
   it('Shortens the hash to 63 characters if the result is longer.', () => {
-    (createHash as any).mockImplementation(() => ({
-      digest: jest.fn(() => 'a'.repeat(64)),
-      update: jest.fn(),
-    }));
-    
+    (cryptoJs.hex.stringify as any).mockImplementation(() => 'a'.repeat(64));
+
     const ifid = new IFID({
       version: IFIDVersions.FileBasedSHA,
       fileContents: 'foobar',
@@ -269,12 +206,18 @@ describe('Generic file-based IFID tests.', () => {
 describe('Z-Code IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('Throws for pre-1990 if no releaseNumber option is provided.', () => {
@@ -334,16 +277,20 @@ describe('Z-Code IFID tests.', () => {
 describe('FORMAT-MD IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
-    (createHash as any).mockImplementation(() => ({ digest: jest.fn(() => ''), update: jest.fn(), }));
     (isFormatMDVersion as any).mockImplementation(() => true);
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
-    (createHash as any).mockClear();
     (isFormatMDVersion as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   afterAll(() => {
@@ -351,37 +298,12 @@ describe('FORMAT-MD IFID tests.', () => {
     (isFormatMDVersion as any).mockImplementation(() => false);
   });
 
-  it('Throws if the filepath option is not provided.', () => {
-    expect(() => new IFID({ version: IFIDVersions.LegacyTADS2, })).toThrow(strings.FILEPATH_MISSING);
-  });
-
-  it('Throws if isNode returns false.', () => {
-    (isNode as any).mockImplementationOnce(() => false);
-
-    const func = () => new IFID({
-      version: IFIDVersions.LegacyTADS2,
-      fileContents: 'foobar',
-    });
-
-    expect(func).toThrow(strings.MD5_IN_BROWSER);
-  });
-
-  it('Passes the md5 argument to the hasher when creating.', () => {
-    new IFID({
-      version: IFIDVersions.ELF,
-      fileContents: 'foobar',
-    });
-
-    expect((createHash as any).mock.calls).toEqual([
-      [ 'md5', ],
-    ]);
+  it('Throws if the fileContents option is not provided.', () => {
+    expect(() => new IFID({ version: IFIDVersions.LegacyTADS2, })).toThrow(strings.FILE_CONTENTS_MISSING);
   });
 
   it('Creates the IFID for FORMAT-MD as expected.', () => {
-    (createHash as any).mockImplementationOnce(() => ({
-      update: jest.fn(),
-      digest: jest.fn(() => 'TESTHASH'),
-    }));
+    (cryptoJs.hex.stringify as any).mockImplementationOnce(() => 'TESTHASH');
 
     expect(new IFID({
       version: IFIDVersions.Java,
@@ -543,47 +465,26 @@ describe('Documented Magnetic Scrolls IFID tests.', () => {
 describe('Undocumented Magnetic Scrolls IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
-    (isNode as any).mockImplementation(() => true);
-    (createHash as any).mockImplementation(() => ({ digest: jest.fn(() => ''), update: jest.fn(), }));  
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
-    (isNode as any).mockClear();
-    (createHash as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('Throws if the filepath option is not provided.', () => {
-    expect(() => new IFID({ version: IFIDVersions.UndocumentedMagneticScrolls, })).toThrow(strings.FILEPATH_MISSING);
-  });
-
-  it('Throws if isNode returns false.', () => {
-    (isNode as any).mockImplementationOnce(() => false);
-
-    const func = () => new IFID({
-      version: IFIDVersions.UndocumentedMagneticScrolls,
-      fileContents: 'foobar',
-    });
-
-    expect(func).toThrow(strings.MD5_IN_BROWSER);
-  });
-
-  it('Passes the md5 argument to the hasher when creating.', () => {
-    new IFID({
-      version: IFIDVersions.UndocumentedMagneticScrolls,
-      fileContents: 'foobar',
-    });
-
-    expect((createHash as any).mock.calls).toEqual([
-      [ 'md5', ],
-    ]);
+    expect(() => new IFID({ version: IFIDVersions.UndocumentedMagneticScrolls, })).toThrow(strings.FILE_CONTENTS_MISSING);
   });
 
   it('Creates the IFID for undocumented Magnetic Scrolls as expected.', () => {
-    (createHash as any).mockImplementationOnce(() => ({
-      update: jest.fn(),
-      digest: jest.fn(() => 'TESTHASH'),
-    }));
+    (cryptoJs.hex.stringify as any).mockImplementationOnce(() => 'TESTHASH');
 
     expect(new IFID({
       version: IFIDVersions.UndocumentedMagneticScrolls,
@@ -596,11 +497,19 @@ describe('Documented Magnetic Scrolls IFID tests.', () => {
   beforeEach(() => {
     (isIFIDVersion as any).mockImplementation(() => true);
     (isAGTVersion as any).mockImplementation(() => true);
+    (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
+    (cryptoJs.MD5 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA1 as any).mockImplementation(() => 'test');
+    (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
   });
 
   afterEach(() => {
     (isIFIDVersion as any).mockClear();
     (isAGTVersion as any).mockClear();
+    (cryptoJs.hex.stringify as any).mockClear();
+    (cryptoJs.MD5 as any).mockClear();
+    (cryptoJs.SHA1 as any).mockClear();
+    (cryptoJs.SHA256 as any).mockClear();
   });
 
   it('Throws if the agtVersion option does not meet the isAGTVersion type guard.', () => {

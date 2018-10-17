@@ -19,13 +19,13 @@ const baseConfig = {
     maxAssetSize: 200000,
     maxEntrypointSize: 400000,
     assetFilter(assetFilename) {
-      return assetFilename.endsWith('.js') || assetFilename.endsWith('.ts');
+      return /\.[jt]$/.test(assetFilename);
     },
   },
 
   devtool: 'source-map',
   context: __dirname,
-  stats: 'errors-only',
+  stats: 'verbose',
   profile: false,
   bail: true,
   cache: false,
@@ -75,6 +75,50 @@ const esFiveBrowserConfig = Object.assign({}, baseConfig, {
     ],
   },
 });
+
+// This is producing the exact same bundle size as the above es5 config.
+/*const esSixBrowserConfig = Object.assign({}, baseConfig, {
+  output: {
+    path: path.resolve(__dirname, 'dist/browser.es6/'),
+    filename: 'index.js',
+    library: 'ifid',
+    libraryTarget: 'umd',
+  },
+
+  module: {
+    rules: [
+      {
+        test: /\.[jt]s$/,
+        include: [
+          path.resolve(__dirname, 'dist/node.esnext/'),
+        ],
+
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [
+              [
+                '@babel/preset-env',
+
+                {
+                  targets: {
+                    browsers: [
+                      '>1%',
+                    ],
+                  },
+
+                  loose: true,
+                  modules: false,
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+  },
+});*/
 
 module.exports = [
   esFiveBrowserConfig,
