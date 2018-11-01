@@ -19,6 +19,7 @@
     "noUnusedParameters":               true,
     "preserveConstEnums":               true,
     "removeComments":                   true,
+    "sourceMap":                        true,
     "strict":                           true
   },
 
