@@ -18,6 +18,11 @@ import {
 jest.mock('../../src/TypeGuards/isUUIDTypeIFIDVersion');
 
 import {
+  isNode,
+} from '../../src/isNode';
+jest.mock('../../src/isNode');
+
+import {
   cryptoJs,
 } from 'big-uuid';
 cryptoJs.hex.stringify = jest.fn();
@@ -72,7 +77,7 @@ describe('General IFID tests.', () => {
   
   it('The uuid property is emitted (as a string) through the id getter if the version property meets the isUUIDTypeIFIDVersion type guard and uuid is truthy.', () => {
     (isUUIDTypeIFIDVersion as any).mockImplementationOnce(() => true);
-    
+
     const ifid = new IFID({});
     const str = 'foobarbaz';
     (ifid as any).__uuid = str;
@@ -81,7 +86,7 @@ describe('General IFID tests.', () => {
   
   it('The __id property is emitted through the id getter if the version property does not meet the isUUIDTypeIFIDVersion type guard.', () => {
     (isUUIDTypeIFIDVersion as any).mockImplementationOnce(() => false);
-    
+
     const ifid = new IFID({});
     const str1 = 'foobarbaz';
     const str2 = 'quuxbuux';
@@ -131,6 +136,7 @@ describe('UUID IFID tests.', () => {
     (cryptoJs.hex.stringify as any).mockImplementation((str: any) => str);
     (cryptoJs.MD5 as any).mockImplementation(() => 'test');
     (cryptoJs.SHA256 as any).mockImplementation(() => 'test');
+    (isNode as any).mockImplementation(() => true);
   });
 
   afterEach(() => {
@@ -138,6 +144,12 @@ describe('UUID IFID tests.', () => {
     (cryptoJs.hex.stringify as any).mockClear();
     (cryptoJs.MD5 as any).mockClear();
     (cryptoJs.SHA256 as any).mockClear();
+  });
+
+  it('Throws if v1 is selected and isNode is false.', () => {
+    (isNode as any).mockImplementationOnce(() => false);
+    const func = () => new IFID({ version: IFIDVersions.UUIDv1 });
+    expect(func).toThrow(strings.VERSION_1_IN_BROWSER);
   });
 
   it('Passes 1 or "1" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
@@ -150,7 +162,7 @@ describe('UUID IFID tests.', () => {
     expect(uuidGenerator.mock.calls[0][0].toString()).toBe('1');
   });
 
-  it('Passes 4 or "4" to the uuidGenerator if the version is IFIDVersions.UUIDv1.', () => {
+  it('Passes 4 or "4" to the uuidGenerator if the version is IFIDVersions.UUIDv4.', () => {
     const uuidGenerator = jest.fn();
     new IFID({
       version: IFIDVersions.UUIDv4,

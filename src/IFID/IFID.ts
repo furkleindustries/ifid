@@ -26,12 +26,14 @@ import {
   isIFIDVersion,
 } from '../TypeGuards/isIFIDVersion';
 import {
+  isNode,
+} from '../isNode';
+import {
   isUUIDTypeIFIDVersion,
 } from '../TypeGuards/isUUIDTypeIFIDVersion';
 import {
   MagneticScrollsDocumentedTitles,
 } from '../Enums/MagneticScrollsDocumentedTitles';
-import { isNode } from '../isNode';
 
 export const strings = {
   AGT_SIGNATURE_INVALID:
