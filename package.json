@@ -1,6 +1,6 @@
 {
   "name": "ifid",
-  "version": "0.3.7",
+  "version": "1.0.0",
   "description": "A package to generate Interactive Fiction Identifiers.",
   "main": "dist/node.es6/index.js",
   "browser": "dist/browser/index.js",
