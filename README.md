@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/furkleindustries/ifid.svg?branch=master)](https://travis-ci.org/furkleindustries/ifid)
 [![Code coverage](https://codecov.io/gh/furkleindustries/ifid/branch/master/graph/badge.svg)](https://codecov.io/gh/furkleindustries/ifid/)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/furkleindustries/big-uuid.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/furkleindustries/big-uuid/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/furkleindustries/big-uuid.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/furkleindustries/big-uuid/context:javascript)
 
 # ifid
 

@@ -195,7 +195,7 @@ export class IFID implements IIFID {
         throw new Error(strings.NAME_MISSING);
       }
 
-      const format = (str: string) => str.replace(/[ ?!]/g, '').toLowerCase();
+      const format = (str: string) => str.replace(/[\s?!]/g, '').toLowerCase();
 
       const name = options.name;
       if (name === MagneticScrollsDocumentedTitles.ThePawn ||
