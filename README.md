@@ -7,9 +7,9 @@
 
 ## Summary
 
-An Interactive Fiction Identifier (IFID) generating class and helper functions. Implements both RFC 4122 UUIDs (versions 1 and 4), as well as essentially all of the Treaty of Babel, revision 9, as it applies to IFIDs. This package relies on the [big-uuid](https://github.com/furkleindustries/big-uuid) package for its generation of version 1 and version 4 UUIDs.
+An Interactive Fiction Identifier (IFID) generating class and helper functions. Implements both RFC 4122 UUIDs (versions 1 and 4), as well as essentially all of the Treaty of Babel, revision 9, as it applies to IFIDs. This package relies on the [uuid](https://npmjs.com/package/uuid) package for its generation of version 1 and version 4 UUIDs and [crypto-js](https://npmjs.com/package/crypto-js) for its usage of MD5 and SHA256 hashing.
 
 ## Usage notes
 
 * Many of the generation methods utilize MD5. This is for historical compatibility with many aspects of the Treaty of Babel. However, MD5 has since proven to be dangerously inadequate as a hashing algorithm, and extreme caution should be taken by anyone intending to use it to create a permanently unique identifier.
-* Generation of version 3 and version 5 UUIDs has been omitted from the IFID generator. If you want to generate these IDs, use [big-uuid](https://github.com/furkleindustries/big-uuid) directly.
+* Generation of version 3 and version 5 UUIDs has been omitted from the IFID generator. If you want to generate these IDs, use [uuid](https://npmjs.com/package/uuid) directly.
