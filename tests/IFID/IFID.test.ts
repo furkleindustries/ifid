@@ -39,10 +39,10 @@ jest.mock('uuid/v4');
 
 const hex = require('crypto-js/enc-hex');
 jest.mock('crypto-js/enc-hex');
-const MD5 = require('crypto-js/MD5');
-jest.mock('crypto-js/MD5');
-const SHA256 = require('crypto-js/SHA256');
-jest.mock('crypto-js/SHA256');
+const MD5 = require('crypto-js/md5');
+jest.mock('crypto-js/md5');
+const SHA256 = require('crypto-js/sha256');
+jest.mock('crypto-js/sha256');
 
 describe('General IFID tests.', () => {
   beforeEach(() => {
