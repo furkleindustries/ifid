@@ -4,20 +4,14 @@ import {
 import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
-import {
-  TNamespaceId,
-  TUUIDVersion,
-} from 'big-uuid';
 
 export interface IIFIDOptions {
   version: IFIDVersions;
 
+  name?: string;
+
   /* To be used for any version that requires getting the digest of a file. */
   fileContents?: string;
-
-  /* To be used for UUIDv3 and UUIDv5. */
-  name?: string;
-  namespaceId?: TNamespaceId;
 
   /* To be used for Z-code releases. */
   releaseNumber?: number;
@@ -31,7 +25,7 @@ export interface IIFIDOptions {
   agtSignature?: string;
   agtLargeOrSoggy?: boolean;
 
-  uuidGenerator?: (version: TUUIDVersion) => { toString(): string };
+  uuidGenerator?: (version: IFIDVersions.UUIDv1 | IFIDVersions.UUIDv4) => string;
 }
 
 export default IIFIDOptions;
