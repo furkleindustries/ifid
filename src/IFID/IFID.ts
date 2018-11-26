@@ -1,13 +1,4 @@
 import {
-  /* Import required crypto-js libraries from `big-uuid` to reduce bundle size.
-   * This shouldn't be necessary but there's something weird about the way
-   * crypto-js modularizes its libraries and Typescript doesn't like it. */
-  cryptoJs,
-
-  TUUIDVersion,
-  UUID,
-} from 'big-uuid';
-import {
   IFIDVersions,
 } from '../Enums/IFIDVersions';
 import {
@@ -34,6 +25,16 @@ import {
 import {
   MagneticScrollsDocumentedTitles,
 } from '../Enums/MagneticScrollsDocumentedTitles';
+import {
+  default as uuidv1,
+} from 'uuid/v1';
+import {
+  default as uuidv4,
+} from 'uuid/v4';
+
+const hex = require('crypto-js/enc-hex');
+const MD5 = require('crypto-js/md5');
+const SHA256 = require('crypto-js/sha256');
 
 export const strings = {
   AGT_SIGNATURE_INVALID:
@@ -124,15 +125,17 @@ export class IFID implements IIFID {
       }
     }
 
-    const uuidGenerator: (version: TUUIDVersion) => { toString(): string, } = (() => {
+    const uuidGenerator: (version: IFIDVersions.UUIDv1 | IFIDVersions.UUIDv4) => string = (() => {
       if (options && typeof options.uuidGenerator === 'function') {
         return options.uuidGenerator;
       } else {
-        return (version: TUUIDVersion) => (
-          new UUID({
-            version,
-          })
-        );
+        return (version: IFIDVersions.UUIDv1 | IFIDVersions.UUIDv4) => {
+          if (version === IFIDVersions.UUIDv1) {
+            return uuidv1();
+          } else {
+            return uuidv4();
+          }
+        };
       }
     })();
 
@@ -142,23 +145,23 @@ export class IFID implements IIFID {
         throw new Error(strings.VERSION_1_IN_BROWSER);
       }
 
-      this.__uuid = uuidGenerator(1);
+      this.__uuid = uuidGenerator(IFIDVersions.UUIDv1);
     } else if (this.version === IFIDVersions.UUIDv4) {
-      this.__uuid = uuidGenerator(4);
+      this.__uuid = uuidGenerator(IFIDVersions.UUIDv4);
     } else if (this.version === IFIDVersions.FileBasedMD5) {
       if (!options.fileContents) {
         throw new Error(strings.FILE_CONTENTS_MISSING);
       }
-    
-      const hash = cryptoJs.MD5(options.fileContents);
-      this.__id = cryptoJs.hex.stringify(hash);
+
+      const hash = MD5(options.fileContents);
+      this.__id = hex.stringify(hash);
     } else if (this.version === IFIDVersions.FileBasedSHA) {
       if (!options.fileContents) {
         throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hash = cryptoJs.SHA256(options.fileContents);
-      const hashed = cryptoJs.hex.stringify(hash);
+      const hash = SHA256(options.fileContents);
+      const hashed = hex.stringify(hash);
       if (hashed.length > 63) {
         this.__id = hashed.slice(0, 63);
       } else {
@@ -187,8 +190,8 @@ export class IFID implements IIFID {
         throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hash = cryptoJs.MD5(options.fileContents);
-      const hashed = cryptoJs.hex.stringify(hash);
+      const hash = MD5(options.fileContents);
+      const hashed = hex.stringify(hash);
       this.__id = `${this.version}-${hashed}`;
     } else if (this.version === IFIDVersions.DocumentedMagneticScrolls) {
       if (!options.name) {
@@ -234,8 +237,8 @@ export class IFID implements IIFID {
         throw new Error(strings.FILE_CONTENTS_MISSING);
       }
 
-      const hash = cryptoJs.MD5(options.fileContents);
-      const hashed = cryptoJs.hex.stringify(hash);
+      const hash = MD5(options.fileContents);
+      const hashed = hex.stringify(hash);
       this.__id = `MAGNETIC-${hashed}`;
     } else if (this.version === IFIDVersions.LegacyAGT) {
       if (!isAGTVersion(options.agtVersion)) {
