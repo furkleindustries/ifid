@@ -92,8 +92,8 @@ export class IFID implements IIFID {
     return this.__version;
   }
 
-  private __uuid?: { toString(): string, };
-  get uuid(): { toString(): string, } | undefined {
+  private __uuid?: string;
+  get uuid(): string | undefined {
     return this.__uuid;
   }
 
@@ -104,7 +104,7 @@ export class IFID implements IIFID {
         throw new Error(strings.UUID_INVALID);
       }
 
-      return this.uuid.toString();
+      return this.uuid;
     } else {
       return this.__id;
     }
