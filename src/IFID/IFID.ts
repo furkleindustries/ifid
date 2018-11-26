@@ -34,7 +34,7 @@ import {
 
 const hex = require('crypto-js/enc-hex');
 const MD5 = require('crypto-js/md5');
-const SHA256 = require('crypto-js/SHA256');
+const SHA256 = require('crypto-js/sha256');
 
 export const strings = {
   AGT_SIGNATURE_INVALID:
